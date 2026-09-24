@@ -234,7 +234,7 @@ class MainWindow(QMainWindow):
             </table>
 
             <div class="panel">
-              <b>Alcance de la versión 0.1</b><br>
+              <b>Alcance de la versión 1.0</b><br>
               Corredor peatonal recto y bidireccional con demanda A → B y B → A.
               WalkSim genera el escenario, ejecuta SUMO con el modelo
               <i>striping</i> y transforma la salida en indicadores de ingeniería.
@@ -370,7 +370,7 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(parameters)
 
         model_note = QLabel(
-            "Modelo peatonal interno: SUMO striping. La versión 0.1 utiliza un "
+            "Modelo peatonal interno: SUMO striping. La versión 1.0 utiliza un "
             "corredor recto de ancho uniforme."
         )
         model_note.setObjectName("pageSubtitle")
