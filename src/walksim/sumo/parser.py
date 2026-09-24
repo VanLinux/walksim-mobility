@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from statistics import fmean
-import xml.etree.ElementTree as ET
 
 from walksim.domain.models import DirectionResult, SimulationResult
 
