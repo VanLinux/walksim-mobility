@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "walksim-mobility"
-version = "0.1.0"
+version = "1.0.0"
 description = "Lightweight pedestrian mobility simulation and analysis tool powered by Eclipse SUMO"
 readme = "README.md"
 requires-python = ">=3.11"
