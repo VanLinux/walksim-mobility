@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
 import shutil
 import subprocess
+from dataclasses import dataclass
+from pathlib import Path
 
 from walksim.domain.models import CorridorScenario, SimulationResult
 from walksim.sumo.generator import ScenarioFiles, build_corridor_files
