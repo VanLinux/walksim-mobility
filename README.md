@@ -4,7 +4,7 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
-## Versión 0.1.0
+## Versión 1.0.0
 
 La primera versión funcional se concentra deliberadamente en un solo problema:
 
@@ -85,7 +85,7 @@ python -m walksim
 
 WalkSim Mobility no pretende sustituir a SUMO, NetEdit o SUMO-GUI. Es una capa de abstracción orientada a problemas específicos de movilidad peatonal, con escenarios parametrizados y resultados de ingeniería.
 
-La versión 0.1.0 no incluye todavía cruces peatonales, interacción vehículo-peatón, semáforos ni edición libre de redes.
+La versión 1.0.0 no incluye todavía cruces peatonales, interacción vehículo-peatón, semáforos ni edición libre de redes.
 
 ## Autor
 
