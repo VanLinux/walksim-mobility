@@ -3,25 +3,30 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import asdict
+from datetime import UTC, datetime
 from pathlib import Path
 
-from PySide6.QtCore import QSettings, Qt, QUrl
+from PySide6.QtCore import QSettings, Qt, QThread, QUrl, Signal
 from PySide6.QtGui import QAction, QActionGroup, QDesktopServices, QPainter, QPalette, QPen
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
     QBoxLayout,
     QDoubleSpinBox,
+    QFileDialog,
     QFormLayout,
     QFrame,
     QGridLayout,
     QGroupBox,
     QHeaderView,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMainWindow,
     QMessageBox,
     QPlainTextEdit,
+    QProgressBar,
     QPushButton,
     QScrollArea,
     QSizePolicy,
@@ -31,14 +36,35 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QTabWidget,
     QTextBrowser,
+    QToolBar,
     QVBoxLayout,
     QWidget,
 )
 
 from walksim import __version__
-from walksim.domain.models import CorridorScenario, DirectionResult
-from walksim.sumo.runner import SumoExecutionError, run_corridor_simulation
+from walksim.csv_io import write_template
+from walksim.domain.models import CorridorScenario, DirectionResult, ProjectInfo, SimulationResult
+from walksim.project import ProjectState, load_project, save_project
+from walksim.report import write_report
+from walksim.sumo.runner import run_corridor_simulation
+from walksim.ui.analysis_widget import AnalysisWidget
 from walksim.ui.styles import apply_theme, theme_colors
+
+
+class SimulationWorker(QThread):
+    succeeded = Signal(object)
+    failed = Signal(str)
+
+    def __init__(self, scenario: CorridorScenario, parent: QWidget) -> None:
+        super().__init__(parent)
+        self.scenario = scenario
+
+    def run(self) -> None:
+        try:
+            self.succeeded.emit(run_corridor_simulation(self.scenario))
+        except Exception as exc:
+            logging.getLogger(__name__).exception("Error al simular el corredor")
+            self.failed.emit(str(exc))
 
 
 class MetricCard(QFrame):
@@ -119,6 +145,11 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.last_output_dir: Path | None = None
+        self.current_file: Path | None = None
+        self.simulation_records: list[dict] = []
+        self._loading = True
+        self._busy = False
+        self.worker: SimulationWorker | None = None
 
         self.setWindowTitle(f"WalkSim Mobility {__version__}")
         self.settings = QSettings("VanLinux", "WalkSim Mobility")
@@ -135,8 +166,26 @@ class MainWindow(QMainWindow):
         self._build_ui()
         self._apply_responsive_layout()
         self._update_preview()
+        self._connect_project_signals()
+        self._loading = False
+        self._set_clean()
 
     def _create_actions(self) -> None:
+        self.new_action = QAction("Nuevo estudio", self)
+        self.new_action.setShortcut("Ctrl+N")
+        self.new_action.triggered.connect(self.new_project)
+        self.open_action = QAction("Abrir .wksim…", self)
+        self.open_action.setShortcut("Ctrl+O")
+        self.open_action.triggered.connect(self.open_project_dialog)
+        self.save_action = QAction("Guardar .wksim", self)
+        self.save_action.setShortcut("Ctrl+S")
+        self.save_action.triggered.connect(self.save_current)
+        self.save_as_action = QAction("Guardar como…", self)
+        self.save_as_action.setShortcut("Ctrl+Shift+S")
+        self.save_as_action.triggered.connect(self.save_as)
+        self.report_action = QAction("Exportar reporte .tex…", self)
+        self.report_action.triggered.connect(self.export_report)
+
         self.simulate_action = QAction("Simular corredor", self)
         self.simulate_action.setShortcut("F5")
         self.simulate_action.triggered.connect(self.simulate)
@@ -164,7 +213,19 @@ class MainWindow(QMainWindow):
 
     def _create_menu(self) -> None:
         file_menu = self.menuBar().addMenu("Archivo")
+        file_menu.addActions(
+            [self.new_action, self.open_action, self.save_action, self.save_as_action]
+        )
+        file_menu.addSeparator()
+        file_menu.addAction(self.report_action)
+        file_menu.addSeparator()
         file_menu.addAction(self.quit_action)
+        toolbar = QToolBar("Estudio", self)
+        toolbar.setMovable(False)
+        toolbar.addActions(
+            [self.new_action, self.open_action, self.save_action, self.report_action]
+        )
+        self.addToolBar(toolbar)
 
         simulation_menu = self.menuBar().addMenu("Simulación")
         simulation_menu.addAction(self.simulate_action)
@@ -214,7 +275,19 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self._scrollable(self.project_tab), "2  Proyecto")
         self.tabs.addTab(self._scrollable(self.corridor_tab), "3  Corredor peatonal")
         self.tabs.addTab(self._scrollable(self.results_tab), "4  Resultados")
+        self.analysis_widget = AnalysisWidget()
+        self.analysis_widget.simulationImported.connect(self._import_corridor)
+        self.analysis_widget.simulationRequested.connect(self.prepare_analysis_simulation)
+        self.tabs.insertTab(2, self._scrollable(self.analysis_widget), "3  Análisis peatonal")
+        self.tabs.setTabText(3, "4  Microsimulación")
+        self.tabs.setTabText(4, "5  Resultados simulados")
         root.addWidget(self.tabs, 1)
+        self.progress = QProgressBar()
+        self.progress.setRange(0, 0)
+        self.progress.setTextVisible(False)
+        self.progress.setFixedHeight(6)
+        self.progress.hide()
+        root.addWidget(self.progress)
 
         self.setCentralWidget(central)
         self.statusBar().showMessage("WalkSim Mobility listo")
@@ -264,27 +337,24 @@ class MainWindow(QMainWindow):
             </table>
 
             <div class="panel">
-              <b>Alcance de la versión 2.0</b><br>
-              Corredor peatonal recto y bidireccional con demanda A → B y B → A.
-              WalkSim analiza el escenario y presenta tiempos, velocidades
-              y recorridos completados.
+              <b>Estudios peatonales de la versión 2</b><br>
+              Aceras, senderos, pelotones, áreas de espera, escaleras y demora de cruces.
+              Microsimulación de corredor recto bidireccional con resultados por sentido.
             </div>
-
             <h2>Flujo de trabajo</h2>
             <ol>
-              <li>Identifique el proyecto.</li>
-              <li>Defina geometría, demanda y velocidad peatonal.</li>
-              <li>Pulse <b>Simular corredor</b>.</li>
-              <li>Revise los resultados totales y por sentido.</li>
+              <li>Identifique el proyecto y escriba el nombre del analista.</li>
+              <li>Elija un análisis: capture los datos o importe su plantilla CSV.</li>
+              <li>Calcule los casos que desea añadir al estudio.</li>
+              <li>Ejecute la microsimulación del corredor cuando corresponda.</li>
+              <li>Guarde sus avances en <b>.wksim</b> y exporte el informe <b>.tex</b>.</li>
             </ol>
-
-            <h2>Fuera del alcance actual</h2>
-            <ul>
-              <li>Cruces peatonales e intersecciones.</li>
-              <li>Interacción vehículo-peatón y control semafórico.</li>
-              <li>Edición libre de redes.</li>
-              <li>Calibración y optimización automática.</li>
-            </ul>
+            <p>Las plantillas contienen un ejemplo editable. Los datos de ejemplo no
+            sustituyen las observaciones del sitio. Cada resultado indica su criterio y alcance.</p>
+            <p><b>Archivo:</b> Nuevo, Abrir, Guardar, Guardar como y Exportar reporte.
+            <b>Apariencia:</b> Modo claro u oscuro. Los borradores y resultados se conservan
+            en el proyecto; los archivos temporales de microsimulación no son necesarios
+            para abrirlo.</p>
             """
         )
 
@@ -334,38 +404,38 @@ class MainWindow(QMainWindow):
 
         self.length_spin = QDoubleSpinBox()
         self.length_spin.setRange(5.0, 2000.0)
-        self.length_spin.setDecimals(1)
+        self.length_spin.setDecimals(6)
         self.length_spin.setValue(100.0)
         self.length_spin.setSuffix(" m")
 
         self.width_spin = QDoubleSpinBox()
         self.width_spin.setRange(0.5, 20.0)
-        self.width_spin.setDecimals(2)
+        self.width_spin.setDecimals(6)
         self.width_spin.setValue(2.5)
         self.width_spin.setSuffix(" m")
 
         self.flow_ab_spin = QDoubleSpinBox()
         self.flow_ab_spin.setRange(0.0, 20000.0)
-        self.flow_ab_spin.setDecimals(0)
+        self.flow_ab_spin.setDecimals(6)
         self.flow_ab_spin.setValue(600.0)
         self.flow_ab_spin.setSuffix(" peat/h")
 
         self.flow_ba_spin = QDoubleSpinBox()
         self.flow_ba_spin.setRange(0.0, 20000.0)
-        self.flow_ba_spin.setDecimals(0)
+        self.flow_ba_spin.setDecimals(6)
         self.flow_ba_spin.setValue(400.0)
         self.flow_ba_spin.setSuffix(" peat/h")
 
         self.speed_spin = QDoubleSpinBox()
         self.speed_spin.setRange(0.2, 3.0)
-        self.speed_spin.setDecimals(2)
+        self.speed_spin.setDecimals(6)
         self.speed_spin.setSingleStep(0.05)
         self.speed_spin.setValue(1.34)
         self.speed_spin.setSuffix(" m/s")
 
         self.period_spin = QDoubleSpinBox()
         self.period_spin.setRange(1.0, 480.0)
-        self.period_spin.setDecimals(0)
+        self.period_spin.setDecimals(6)
         self.period_spin.setValue(60.0)
         self.period_spin.setSuffix(" min")
 
@@ -394,7 +464,14 @@ class MainWindow(QMainWindow):
         simulate_button = QPushButton("Simular corredor")
         simulate_button.setObjectName("primaryButton")
         simulate_button.clicked.connect(self.simulate)
+        self.simulate_button = simulate_button
         left_layout.addWidget(simulate_button)
+        import_csv = QPushButton("Importar escenario CSV")
+        import_csv.clicked.connect(self.analysis_widget_import_csv)
+        template_csv = QPushButton("Descargar plantilla del corredor")
+        template_csv.clicked.connect(self.download_corridor_template)
+        left_layout.addWidget(import_csv)
+        left_layout.addWidget(template_csv)
         left_layout.addStretch()
 
         preview_box = QGroupBox("Esquema del escenario")
@@ -449,6 +526,7 @@ class MainWindow(QMainWindow):
         rerun = QPushButton("Simular nuevamente")
         rerun.setObjectName("primaryButton")
         rerun.clicked.connect(self.simulate)
+        self.rerun_button = rerun
         top.addWidget(rerun)
         layout.addLayout(top)
 
@@ -501,6 +579,9 @@ class MainWindow(QMainWindow):
         self.output_label.setObjectName("pageSubtitle")
         self.output_label.setWordWrap(True)
         layout.addWidget(self.output_label)
+        self.measurement_browser = QTextBrowser()
+        self.measurement_browser.setMinimumHeight(180)
+        layout.addWidget(self.measurement_browser)
 
         return page
 
@@ -572,27 +653,74 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Datos del escenario", "\n".join(errors))
             return
 
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        self.statusBar().showMessage("Simulando corredor…")
-
-        try:
-            run = run_corridor_simulation(scenario)
-        except (SumoExecutionError, OSError, ValueError):
-            logging.getLogger(__name__).exception("Error al simular el corredor")
-            QMessageBox.critical(
-                self,
-                "No fue posible simular",
-                "No se pudo completar la simulación. Revise los parámetros y la "
-                "instalación según los requisitos del repositorio.",
-            )
-            self.statusBar().showMessage("Simulación no ejecutada")
+        if self._busy:
             return
-        finally:
-            QApplication.restoreOverrideCursor()
+        self._busy = True
+        self._set_busy(True)
+        self.statusBar().showMessage("Simulando corredor… Puede guardar el estudio al terminar.")
+        self.worker = SimulationWorker(scenario, self)
+        self.worker.succeeded.connect(self._simulation_completed)
+        self.worker.failed.connect(self._simulation_failed)
+        self.worker.finished.connect(self._simulation_finished)
+        self.worker.start()
 
+    def _set_busy(self, busy: bool) -> None:
+        self.progress.setVisible(busy)
+        self.corridor_tab.setEnabled(not busy)
+        self.simulate_action.setEnabled(not busy)
+        self.rerun_button.setEnabled(not busy)
+        for action in (
+            self.new_action,
+            self.open_action,
+            self.save_action,
+            self.save_as_action,
+            self.report_action,
+        ):
+            action.setEnabled(not busy)
+
+    def _simulation_failed(self, _detail: str) -> None:
+        QMessageBox.critical(
+            self,
+            "No fue posible simular",
+            "Revise los parámetros y la instalación según los requisitos del "
+            "repositorio. El detalle técnico se conserva en la terminal.",
+        )
+        self.statusBar().showMessage("Simulación no ejecutada")
+
+    def _simulation_finished(self) -> None:
+        self._busy = False
+        self._set_busy(False)
+        if self.worker:
+            self.worker.deleteLater()
+            self.worker = None
+
+    def _simulation_completed(self, run) -> None:
+        scenario = self.worker.scenario
         self.last_output_dir = run.files.workdir
-        result = run.result
+        record = {
+            "scenario": asdict(scenario),
+            "result": asdict(run.result),
+            "created_at": datetime.now(UTC).isoformat(),
+            "engine_version": getattr(run, "engine_version", "No registrada"),
+            "measurements": getattr(run, "measurements", {}),
+            "assumptions": [
+                "La ocupación se integra durante el periodo de demanda; los tiempos medios "
+                "incluyen recorridos completados hasta terminar el despeje.",
+                "El espacio equivalente utiliza toda la longitud y el ancho útil del corredor. "
+                "El LOS es indicativo del promedio global; no mide la zona más congestionada "
+                "ni constituye una validación HCM local.",
+                "El tiempo perdido simulado no es la demora de control de un cruce.",
+            ],
+        }
+        self.simulation_records.append(record)
+        self._show_simulation(record)
+        self._mark_dirty()
 
+    def _show_simulation(self, record: dict) -> None:
+        scenario = CorridorScenario(**record["scenario"])
+        result = SimulationResult(
+            **{key: DirectionResult(**value) for key, value in record["result"].items()}
+        )
         self.completed_card.set_metric(
             str(result.total.completed_walks),
             "ambos sentidos",
@@ -615,9 +743,31 @@ class MainWindow(QMainWindow):
         self._set_result_row(2, "Total", result.total)
 
         self.result_status.setText(f"Simulación completada · semilla {scenario.seed}")
-        self.output_label.setText("Archivos temporales del escenario: " + str(run.files.workdir))
+        self.output_label.setText(
+            "Resultado conservado del escenario ejecutado. "
+            "El reporte incluye el historial de microsimulaciones."
+        )
+        from html import escape
 
-        self.tabs.setCurrentIndex(3)
+        from walksim.report import display
+
+        rows = "".join(
+            "<tr><td>" + escape(k) + "</td><td><b>" + escape(display(v)) + "</b></td></tr>"
+            for k, v in record.get("measurements", {}).items()
+        )
+        self.measurement_browser.setHtml(
+            "<table cellpadding='5'>"
+            + rows
+            + "</table><p>"
+            + escape(record.get("assumptions", [""])[0])
+            + "</p><p>"
+            + escape(
+                "El LOS por espacio global es indicativo; no evalúa densidades locales máximas."
+            )
+            + "</p>"
+        )
+
+        self.tabs.setCurrentIndex(4)
         self.statusBar().showMessage("Simulación completada")
 
     def _set_result_row(self, row: int, label: str, result: DirectionResult) -> None:
@@ -635,6 +785,262 @@ class MainWindow(QMainWindow):
             if column > 0:
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.results_table.setItem(row, column, item)
+
+    def _connect_project_signals(self) -> None:
+        for widget in (self.project_name, self.project_location, self.project_analyst):
+            widget.textChanged.connect(self._mark_dirty)
+        self.project_notes.textChanged.connect(self._mark_dirty)
+        for widget in (
+            self.length_spin,
+            self.width_spin,
+            self.flow_ab_spin,
+            self.flow_ba_spin,
+            self.speed_spin,
+            self.period_spin,
+            self.seed_spin,
+        ):
+            widget.valueChanged.connect(self._mark_dirty)
+        self.analysis_widget.changed.connect(self._mark_dirty)
+
+    def _mark_dirty(self, *_args) -> None:
+        if not self._loading:
+            self.setWindowModified(True)
+
+    def _set_clean(self) -> None:
+        title = self.current_file.name if self.current_file else "Estudio sin guardar"
+        self.setWindowTitle(f"WalkSim Mobility {__version__} — {title}[*]")
+        self.setWindowModified(False)
+
+    def collect_project(self) -> ProjectState:
+        self.analysis_widget._store_draft()
+        return ProjectState(
+            ProjectInfo(
+                self.project_name.text(),
+                self.project_location.text(),
+                self.project_analyst.text(),
+                self.project_notes.toPlainText(),
+            ),
+            self._scenario_from_ui(),
+            self.analysis_widget.method,
+            self.analysis_widget.drafts,
+            self.analysis_widget.names,
+            self.analysis_widget.results,
+            self.simulation_records,
+        )
+
+    def save_to_path(self, path: str | Path) -> Path:
+        saved = save_project(self.collect_project(), path)
+        self.current_file = saved
+        self._set_clean()
+        self.statusBar().showMessage("Estudio guardado: " + saved.name)
+        return saved
+
+    def save_current(self, *_args) -> bool:
+        if self._busy:
+            return False
+        if self.current_file is None:
+            return self.save_as()
+        try:
+            self.save_to_path(self.current_file)
+            return True
+        except (ValueError, OSError) as exc:
+            QMessageBox.warning(self, "No fue posible guardar", str(exc))
+            return False
+
+    def save_as(self, *_args) -> bool:
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Guardar estudio",
+            str(self.current_file or "estudio.wksim"),
+            "Proyecto WalkSim (*.wksim)",
+        )
+        if not path:
+            return False
+        try:
+            self.save_to_path(path)
+            return True
+        except (ValueError, OSError) as exc:
+            QMessageBox.warning(self, "No fue posible guardar", str(exc))
+            return False
+
+    def _confirm_discard(self) -> bool:
+        if not self.isWindowModified():
+            return True
+        answer = QMessageBox.question(
+            self,
+            "Cambios sin guardar",
+            "¿Desea guardar sus avances?",
+            QMessageBox.StandardButton.Save
+            | QMessageBox.StandardButton.Discard
+            | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Save,
+        )
+        if answer == QMessageBox.StandardButton.Cancel:
+            return False
+        return self.save_current() if answer == QMessageBox.StandardButton.Save else True
+
+    def load_from_path(self, path: str | Path) -> None:
+        candidate = load_project(path)
+        self._apply_project(candidate)
+        self.current_file = Path(path)
+        self._set_clean()
+        self.statusBar().showMessage("Estudio abierto: " + self.current_file.name)
+
+    def open_project_dialog(self, *_args) -> None:
+        if self._busy or not self._confirm_discard():
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Abrir estudio", "", "Proyecto WalkSim (*.wksim)"
+        )
+        if path:
+            try:
+                self.load_from_path(path)
+            except (ValueError, OSError) as exc:
+                QMessageBox.warning(self, "No fue posible abrir", str(exc))
+
+    def _apply_project(self, state: ProjectState) -> None:
+        self._loading = True
+        self.project_name.setText(state.project.name)
+        self.project_location.setText(state.project.location)
+        self.project_analyst.setText(state.project.analyst)
+        self.project_notes.setPlainText(state.project.notes)
+        self._import_corridor(asdict(state.corridor))
+        self.analysis_widget.restore(
+            state.active_method, state.drafts, state.draft_names, state.analyses
+        )
+        self.simulation_records = state.simulations
+        self.last_output_dir = None
+        if self.simulation_records:
+            self._show_simulation(self.simulation_records[-1])
+        else:
+            self.results_table.clearContents()
+            for card in self.metric_cards:
+                card.set_metric("—")
+            self.result_status.setText("Aún no se ha ejecutado una simulación.")
+            self.output_label.clear()
+            self.measurement_browser.clear()
+        self.tabs.setCurrentIndex(1)
+        self._loading = False
+
+    def new_project(self, *_args) -> None:
+        if self._busy or not self._confirm_discard():
+            return
+        self._apply_project(ProjectState())
+        self.current_file = None
+        self._set_clean()
+
+    def export_report(self, *_args) -> None:
+        if not self.project_analyst.text().strip():
+            analyst, accepted = QInputDialog.getText(
+                self, "Analista del estudio", "Nombre del analista:"
+            )
+            if not accepted or not analyst.strip():
+                return
+            self.project_analyst.setText(analyst.strip())
+        if not self.analysis_widget.results and not self.simulation_records:
+            QMessageBox.information(
+                self, "Reporte", "Calcule un análisis o ejecute una simulación."
+            )
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Exportar informe completo", "informe_walksim.tex", "LaTeX (*.tex)"
+        )
+        if path:
+            try:
+                write_report(
+                    self.collect_project(), path if path.lower().endswith(".tex") else path + ".tex"
+                )
+                self.statusBar().showMessage("Reporte LaTeX exportado")
+            except (ValueError, OSError) as exc:
+                QMessageBox.warning(self, "No fue posible exportar", str(exc))
+
+    def analysis_widget_import_csv(self, *_args) -> None:
+        self.analysis_widget.import_csv()
+
+    def download_corridor_template(self, *_args) -> None:
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Plantilla del corredor", "plantilla_simulation.csv", "CSV (*.csv)"
+        )
+        if path:
+            try:
+                write_template(
+                    path if path.lower().endswith(".csv") else path + ".csv", "simulation"
+                )
+            except (ValueError, OSError) as exc:
+                QMessageBox.warning(self, "No fue posible exportar", str(exc))
+
+    def prepare_analysis_simulation(self, result: dict) -> None:
+        if self._busy:
+            return
+        length, accepted = QInputDialog.getDouble(
+            self,
+            "Geometría del corredor",
+            "Longitud a simular (m):",
+            self.length_spin.value(),
+            5,
+            2000,
+            3,
+        )
+        if not accepted:
+            return
+        share, accepted = QInputDialog.getDouble(
+            self,
+            "Distribución por sentido",
+            "Porcentaje de la demanda que circula A → B:",
+            50,
+            0,
+            100,
+            2,
+        )
+        if not accepted:
+            return
+        x = result["inputs"]
+        period = 5 if result["method"] == "platoon" else x["period_min"]
+        total = x["count"] * 60 / period
+        scenario = asdict(self._scenario_from_ui())
+        scenario.update(
+            length_m=length,
+            width_m=result["metrics"]["Ancho efectivo (m)"],
+            flow_ab_pph=total * share / 100,
+            flow_ba_pph=total * (1 - share / 100),
+            walking_speed_mps=x["speed_mps"],
+            analysis_time_s=period * 60,
+        )
+        candidate = CorridorScenario(**scenario)
+        if candidate.validate():
+            QMessageBox.warning(self, "Escenario fuera de rango", "\n".join(candidate.validate()))
+            return
+        self._import_corridor(scenario)
+        self.statusBar().showMessage("Escenario preparado; pulse Simular corredor para ejecutarlo.")
+
+    def _import_corridor(self, values: dict) -> None:
+        scenario = CorridorScenario(**values)
+        pairs = (
+            (self.length_spin, scenario.length_m),
+            (self.width_spin, scenario.width_m),
+            (self.flow_ab_spin, scenario.flow_ab_pph),
+            (self.flow_ba_spin, scenario.flow_ba_pph),
+            (self.speed_spin, scenario.walking_speed_mps),
+            (self.period_spin, scenario.analysis_time_s / 60),
+            (self.seed_spin, scenario.seed),
+        )
+        for widget, value in pairs:
+            widget.setValue(value)
+        self._update_preview()
+        self.tabs.setCurrentIndex(3)
+        self._mark_dirty()
+
+    def closeEvent(self, event) -> None:  # noqa: N802
+        if self._busy:
+            QMessageBox.information(
+                self, "Simulación en curso", "Espere a que termine la simulación antes de cerrar."
+            )
+            event.ignore()
+            return
+        if self._confirm_discard():
+            event.accept()
+        else:
+            event.ignore()
 
     def show_about(self) -> None:
         QMessageBox.about(

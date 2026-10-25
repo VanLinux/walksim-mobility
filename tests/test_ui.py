@@ -10,7 +10,7 @@ from PySide6.QtCore import QSettings, Qt
 from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import QApplication, QLabel
 
-from walksim.domain.models import DirectionResult
+from walksim.domain.models import DirectionResult, SimulationResult
 from walksim.ui import main_window
 
 
@@ -24,6 +24,7 @@ def window(tmp_path, monkeypatch):
     widget.show()
     app.processEvents()
     yield widget, app
+    widget.setWindowModified(False)
     widget.close()
 
 
@@ -47,7 +48,7 @@ def test_theme_persists_without_changing_scenario(window):
 def test_small_screen_navigation_and_controls(window, width, height, columns):
     widget, app = window
     widget.resize(width, height)
-    for index in range(4):
+    for index in range(5):
         widget.tabs.setCurrentIndex(index)
         app.processEvents()
     assert widget.width() == width
@@ -57,14 +58,14 @@ def test_small_screen_navigation_and_controls(window, width, height, columns):
         assert position[:2] == (index // columns, index % columns)
     expected = Qt.Orientation.Vertical if width < 900 else Qt.Orientation.Horizontal
     assert widget.corridor_splitter.orientation() == expected
-    widget.tabs.setCurrentIndex(2)
+    widget.tabs.setCurrentIndex(3)
     app.processEvents()
-    scroll = widget.tabs.widget(2)
+    scroll = widget.tabs.widget(3)
     scroll.ensureWidgetVisible(widget.seed_spin)
     app.processEvents()
     center = widget.seed_spin.mapTo(scroll.viewport(), widget.seed_spin.rect().center())
     assert scroll.viewport().rect().contains(center)
-    widget.tabs.setCurrentIndex(3)
+    widget.tabs.setCurrentIndex(4)
     app.processEvents()
     if width < 1000:
         assert widget.results_table.horizontalScrollBar().maximum() > 0
@@ -79,10 +80,118 @@ def test_simulation_result_still_opens_results_tab(window, monkeypatch, tmp_path
         "run_corridor_simulation",
         lambda _scenario: SimpleNamespace(
             files=SimpleNamespace(workdir=tmp_path),
-            result=SimpleNamespace(ab=result, ba=result, total=result),
+            result=SimulationResult(ab=result, ba=result, total=result),
         ),
     )
     widget.simulate()
-    assert widget.tabs.currentIndex() == 3
+    import time
+
+    deadline = time.monotonic() + 3
+    while widget._busy and time.monotonic() < deadline:
+        _app.processEvents()
+    assert not widget._busy
+    assert widget.tabs.currentIndex() == 4
     assert widget.last_output_dir == tmp_path
     assert widget.results_table.item(2, 0).text() == "Total"
+
+
+def test_save_open_restores_partial_forms_and_results(window, tmp_path):
+    widget, app = window
+    widget.project_name.setText("Estudio de prueba")
+    widget.project_analyst.setText("Héctor")
+    panel = widget.analysis_widget
+    panel.selector.setCurrentIndex(panel.selector.findData("queue"))
+    panel.calculate_current()
+    panel.selector.setCurrentIndex(panel.selector.findData("walkway"))
+    panel.inputs["width_m"].clear()
+    panel.inputs["count"].setText("incompleto")
+    widget.width_spin.setValue(3.125)
+    saved = widget.save_to_path(tmp_path / "estudio.wksim")
+    assert not widget.isWindowModified()
+    panel.inputs["count"].setText("otro")
+    widget.load_from_path(saved)
+    app.processEvents()
+    assert widget.project_analyst.text() == "Héctor"
+    assert widget.width_spin.value() == 3.125
+    assert panel.method == "walkway"
+    assert panel.inputs["width_m"].text() == ""
+    assert panel.inputs["count"].text() == "incompleto"
+    assert len(panel.results) == 1
+    assert not widget.isWindowModified()
+
+
+def test_open_bad_file_leaves_study_untouched(window, tmp_path):
+    widget, _app = window
+    widget.project_name.setText("No perder")
+    bad = tmp_path / "corrupt.wksim"
+    bad.write_text("{incorrecto}")
+    with pytest.raises(ValueError):
+        widget.load_from_path(bad)
+    assert widget.project_name.text() == "No perder"
+    assert widget.isWindowModified()
+
+
+def test_invalid_csv_does_not_append_partial_cases(window, tmp_path, monkeypatch):
+    widget, _app = window
+    path = tmp_path / "batch.csv"
+    path.write_text(
+        "analysis,name,area_m2,excluded_area_m2,occupants\n"
+        "queue,valid,30,0,20\nqueue,invalid,0,0,20\n"
+    )
+    monkeypatch.setattr("walksim.ui.analysis_widget.QMessageBox.warning", lambda *_: None)
+    assert not widget.analysis_widget.import_path(str(path))
+    assert widget.analysis_widget.results == []
+
+
+def test_cancel_close_preserves_unsaved_work(window, monkeypatch):
+    widget, _app = window
+    widget.project_notes.setPlainText("Pendiente")
+    monkeypatch.setattr(
+        main_window.QMessageBox,
+        "question",
+        lambda *_args: main_window.QMessageBox.StandardButton.Cancel,
+    )
+    assert not widget.close()
+    assert widget.isWindowModified()
+
+
+def test_worker_failure_preserves_cases_and_releases_controls(window, monkeypatch):
+    import time
+
+    widget, app = window
+    panel = widget.analysis_widget
+    panel.calculate_current()
+
+    def fail(_scenario):
+        raise OSError("test failure")
+
+    monkeypatch.setattr(main_window, "run_corridor_simulation", fail)
+    monkeypatch.setattr(main_window.QMessageBox, "critical", lambda *_: None)
+    widget.simulate()
+    deadline = time.monotonic() + 3
+    while widget._busy and time.monotonic() < deadline:
+        app.processEvents()
+    assert not widget._busy
+    assert widget.save_action.isEnabled()
+    assert len(panel.results) == 1
+    assert not widget.simulation_records
+
+
+def test_analysis_to_simulation_transfer_uses_effective_width_and_explicit_share(
+    window, monkeypatch
+):
+    from walksim.domain.analysis import calculate
+
+    widget, _app = window
+    result = calculate(
+        "walkway",
+        dict(width_m=3, obstacles_m=0.2, edges_m=0.3, count=450, period_min=15, speed_mps=1.2),
+    ).to_dict()
+    answers = iter([(150, True), (60, True)])
+    monkeypatch.setattr(main_window.QInputDialog, "getDouble", lambda *_args: next(answers))
+    widget.prepare_analysis_simulation(result)
+    assert widget.length_spin.value() == 150
+    assert widget.width_spin.value() == 2.5
+    assert widget.flow_ab_spin.value() == 1080
+    assert widget.flow_ba_spin.value() == 720
+    assert widget.tabs.currentIndex() == 3

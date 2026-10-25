@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from walksim.domain.models import CorridorScenario, SimulationResult
 from walksim.sumo.generator import ScenarioFiles, build_corridor_files
-from walksim.sumo.parser import parse_personinfo
+from walksim.sumo.parser import corridor_measurements, parse_personinfo
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +26,8 @@ class SumoInstallation:
 class SimulationRun:
     result: SimulationResult
     files: ScenarioFiles
+    engine_version: str = "No registrada"
+    measurements: dict = field(default_factory=dict)
 
 
 class SumoExecutionError(RuntimeError):
@@ -46,6 +48,7 @@ def _run_command(command: list[str], cwd: Path, label: str) -> None:
         capture_output=True,
         text=True,
         check=False,
+        timeout=180,
     )
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip() or "Sin detalle."
@@ -92,6 +95,8 @@ def run_corridor_simulation(
             "striping",
             "--personinfo-output",
             files.personinfo.name,
+            "--tripinfo-output.write-unfinished",
+            "true",
             "--statistic-output",
             files.statistics.name,
             "--seed",
@@ -106,7 +111,18 @@ def run_corridor_simulation(
     if not files.personinfo.exists():
         raise SumoExecutionError("SUMO finalizó sin generar personinfo.xml.")
 
+    version = subprocess.run(
+        [str(installation.sumo), "--version"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    ).stdout.splitlines()
     return SimulationRun(
+        engine_version=version[0] if version else "No registrada",
+        measurements=corridor_measurements(
+            files.personinfo, scenario.length_m, scenario.width_m, scenario.analysis_time_s
+        ),
         result=parse_personinfo(files.personinfo),
         files=files,
     )

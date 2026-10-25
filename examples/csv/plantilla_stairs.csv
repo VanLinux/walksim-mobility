@@ -1,0 +1,2 @@
+﻿analysis,name,width_m,obstacles_m,edges_m,reverse_flow,count,period_min,speed_mps
+stairs,Ejemplo editable,3,0.2,0.3,0,150,15,0.5

@@ -1,0 +1,2 @@
+﻿analysis,name,length_m,width_m,flow_ab_pph,flow_ba_pph,walking_speed_mps,analysis_time_s,seed
+simulation,Ejemplo editable,100.0,2.5,600.0,400.0,1.34,3600.0,42

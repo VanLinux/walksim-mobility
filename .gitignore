@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Estudios personales; solo se versionan los ejemplos didácticos.
+*.wksim
+!examples/*.wksim
