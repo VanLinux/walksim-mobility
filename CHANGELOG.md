@@ -2,6 +2,12 @@
 
 ## 2.1.0 — 24 de octubre de 2026 (familia 2)
 
+- Retirada la barra de accesos a Nuevo, Abrir, Guardar y Exportar; las acciones
+  siguen disponibles en Archivo y mediante sus atajos.
+- Retirada la opción del repositorio en Ayuda.
+- Renombrada la acción del menú Simulación a «Simular ejemplo»; ejecuta el
+  corredor con los parámetros actuales (los valores iniciales son un ejemplo).
+
 - Guardado y apertura de estudios `.wksim`, incluyendo identificación, borradores
   incompletos, casos analíticos y resultados de microsimulación; escritura atómica
   y aviso de cambios sin guardar.

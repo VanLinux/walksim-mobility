@@ -7,8 +7,8 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-from PySide6.QtCore import QSettings, Qt, QThread, QUrl, Signal
-from PySide6.QtGui import QAction, QActionGroup, QDesktopServices, QPainter, QPalette, QPen
+from PySide6.QtCore import QSettings, Qt, QThread, Signal
+from PySide6.QtGui import QAction, QActionGroup, QPainter, QPalette, QPen
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
@@ -36,7 +36,6 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QTabWidget,
     QTextBrowser,
-    QToolBar,
     QVBoxLayout,
     QWidget,
 )
@@ -186,14 +185,12 @@ class MainWindow(QMainWindow):
         self.report_action = QAction("Exportar reporte .tex…", self)
         self.report_action.triggered.connect(self.export_report)
 
-        self.simulate_action = QAction("Simular corredor", self)
+        self.simulate_action = QAction("Simular ejemplo", self)
+        self.simulate_action.setToolTip(
+            "Ejecuta el corredor con los parámetros actuales; los valores iniciales son un ejemplo."
+        )
         self.simulate_action.setShortcut("F5")
         self.simulate_action.triggered.connect(self.simulate)
-
-        self.repository_action = QAction("Abrir repositorio", self)
-        self.repository_action.triggered.connect(
-            lambda: QDesktopServices.openUrl(QUrl("https://github.com/VanLinux/walksim-mobility"))
-        )
 
         self.about_action = QAction("Acerca de WalkSim Mobility", self)
         self.about_action.triggered.connect(self.show_about)
@@ -220,13 +217,6 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.report_action)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_action)
-        toolbar = QToolBar("Estudio", self)
-        toolbar.setMovable(False)
-        toolbar.addActions(
-            [self.new_action, self.open_action, self.save_action, self.report_action]
-        )
-        self.addToolBar(toolbar)
-
         simulation_menu = self.menuBar().addMenu("Simulación")
         simulation_menu.addAction(self.simulate_action)
 
@@ -234,7 +224,7 @@ class MainWindow(QMainWindow):
         appearance_menu.addActions(self.theme_actions.actions())
 
         help_menu = self.menuBar().addMenu("Ayuda")
-        help_menu.addActions([self.repository_action, self.about_action])
+        help_menu.addAction(self.about_action)
 
     def _build_ui(self) -> None:
         central = QWidget()
