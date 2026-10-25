@@ -4,9 +4,9 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
-## Versión 1.0.0
+## Versión 2.0.0
 
-La primera versión funcional se concentra deliberadamente en un solo problema:
+El análisis se concentra en un problema:
 
 **Corredor peatonal bidireccional.**
 
@@ -20,6 +20,20 @@ El usuario define:
 - semilla de simulación.
 
 WalkSim Mobility construye automáticamente el escenario, ejecuta SUMO con el modelo peatonal **striping** y procesa la salida para presentar indicadores interpretables.
+
+## Interfaz de la versión 2
+
+- Menú **Apariencia → Modo claro / Modo oscuro**; la elección se conserva al cerrar.
+- Ventana inicial ajustada al espacio disponible de la pantalla.
+- Parámetros y esquema en columnas para ventanas amplias y apilados en ventanas estrechas.
+- Pestañas desplazables y contenido con desplazamiento para pantallas pequeñas.
+- Tarjetas de resultados distribuidas en cuatro, dos o una columna según el ancho.
+- Tabla de resultados con columnas ajustables y desplazamiento horizontal.
+- La interfaz presenta el análisis peatonal sin avisos sobre el motor interno.
+
+Eclipse SUMO sigue siendo una dependencia de ejecución. Si una simulación falla,
+la interfaz presenta un aviso general; la terminal conserva el detalle técnico
+para diagnóstico. Los requisitos de instalación se describen más abajo.
 
 ## Resultados actuales
 
@@ -85,7 +99,7 @@ python -m walksim
 
 WalkSim Mobility no pretende sustituir a SUMO, NetEdit o SUMO-GUI. Es una capa de abstracción orientada a problemas específicos de movilidad peatonal, con escenarios parametrizados y resultados de ingeniería.
 
-La versión 1.0.0 no incluye todavía cruces peatonales, interacción vehículo-peatón, semáforos ni edición libre de redes.
+La versión 2.0.0 no incluye todavía cruces peatonales, interacción vehículo-peatón, semáforos ni edición libre de redes.
 
 ## Autor
 
@@ -94,3 +108,4 @@ Héctor Alonso Benítez García
 ## Licencia
 
 GNU General Public License v3.0.
+

@@ -9,7 +9,6 @@ from PySide6.QtWidgets import QApplication
 
 from walksim import __version__
 from walksim.ui.main_window import MainWindow
-from walksim.ui.styles import APP_STYLESHEET
 
 
 def main() -> int:
@@ -19,7 +18,6 @@ def main() -> int:
     app.setApplicationVersion(__version__)
     app.setOrganizationName("VanLinux")
     app.setStyle("Fusion")
-    app.setStyleSheet(APP_STYLESHEET)
     QLocale.setDefault(QLocale(QLocale.Language.Spanish, QLocale.Country.Mexico))
 
     window = MainWindow()

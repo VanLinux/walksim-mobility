@@ -1,20 +1,36 @@
-"""Sistema visual de WalkSim Mobility, alineado con HCNet Transport."""
+"""Temas neutros de WalkSim Mobility."""
 
 from __future__ import annotations
 
-COLORS = {
-    "ink": "#202124",
-    "muted": "#5F6368",
-    "canvas": "#F5F5F5",
-    "surface": "#FFFFFF",
-    "line": "#DADCE0",
-    "dark": "#30343B",
-    "success": "#18794E",
-    "warning": "#9A5B13",
-    "error": "#B42318",
-}
+import re
 
-APP_STYLESHEET = """
+from PySide6.QtGui import QColor, QPalette
+from PySide6.QtWidgets import QApplication
+
+
+def theme_colors(mode: str) -> dict[str, str]:
+    if mode == "dark":
+        return dict(
+            ink="#EEEEEE",
+            muted="#B9BCC1",
+            canvas="#202124",
+            surface="#292B2F",
+            line="#555960",
+            dark="#EEEEEE",
+            alternate="#34373C",
+        )
+    return dict(
+        ink="#202124",
+        muted="#5F6368",
+        canvas="#F5F5F5",
+        surface="#FFFFFF",
+        line="#DADCE0",
+        dark="#30343B",
+        alternate="#F1F3F4",
+    )
+
+
+_LIGHT_STYLESHEET = """
 QMainWindow, QDialog {
     background: #F5F5F5;
     color: #202124;
@@ -181,14 +197,63 @@ QLabel#metricValue {
     font-size: 20pt;
     font-weight: 700;
 }
-QFrame#sumoStatusOk {
-    background: #EDF7F1;
-    border: 1px solid #B7D9C6;
-    border-radius: 7px;
-}
-QFrame#sumoStatusMissing {
-    background: #F8F1E8;
-    border: 1px solid #DDC5A5;
-    border-radius: 7px;
-}
 """
+
+
+def apply_theme(app: QApplication, mode: str) -> None:
+    colors = theme_colors(mode)
+    palette = QPalette()
+    for role, value in (
+        (QPalette.ColorRole.Window, "canvas"),
+        (QPalette.ColorRole.WindowText, "ink"),
+        (QPalette.ColorRole.Base, "surface"),
+        (QPalette.ColorRole.AlternateBase, "alternate"),
+        (QPalette.ColorRole.Text, "ink"),
+        (QPalette.ColorRole.Button, "alternate"),
+        (QPalette.ColorRole.ButtonText, "ink"),
+        (QPalette.ColorRole.ToolTipBase, "surface"),
+        (QPalette.ColorRole.ToolTipText, "ink"),
+        (QPalette.ColorRole.PlaceholderText, "muted"),
+        (QPalette.ColorRole.Mid, "line"),
+        (QPalette.ColorRole.Link, "ink"),
+    ):
+        palette.setColor(role, QColor(colors[value]))
+    palette.setColor(QPalette.ColorRole.Highlight, QColor("#5F6368"))
+    palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#FFFFFF"))
+    for role in (
+        QPalette.ColorRole.Text,
+        QPalette.ColorRole.WindowText,
+        QPalette.ColorRole.ButtonText,
+    ):
+        palette.setColor(QPalette.ColorGroup.Disabled, role, QColor(colors["muted"]))
+    app.setPalette(palette)
+    stylesheet = _LIGHT_STYLESHEET
+    if mode == "dark":
+        replacements = {
+            "#F5F5F5": colors["canvas"],
+            "#202124": colors["ink"],
+            "#FFFFFF": colors["surface"],
+            "#DADCE0": colors["line"],
+            "#C7C9CC": colors["line"],
+            "#5F6368": colors["muted"],
+            "#30343B": colors["dark"],
+            "#E8EAED": colors["alternate"],
+            "#BFC2C5": colors["line"],
+            "#ECEDEF": colors["alternate"],
+            "#F7F7F7": colors["alternate"],
+        }
+        stylesheet = re.sub(
+            r"#[0-9A-Fa-f]{6}", lambda match: replacements.get(match[0], match[0]), stylesheet
+        )
+    stylesheet += f"""
+        QScrollArea, QScrollArea > QWidget > QWidget {{ background: {colors["canvas"]}; }}
+        QLabel#versionBadge {{ background: #30343B; color: white; border-radius: 5px;
+            padding: 6px 10px; font-weight: 700; }}
+        QPushButton#primaryButton {{ background: #30343B; color: white; }}
+        QPushButton#primaryButton:hover {{ background: #4B5057; }}
+        QMenu::item:selected {{ background: #4B5057; color: white; }}
+        QTableWidget {{ selection-background-color: #5F6368; selection-color: white; }}
+        QToolTip {{ background: {colors["surface"]}; color: {colors["ink"]};
+            border: 1px solid {colors["line"]}; }}
+    """
+    app.setStyleSheet(stylesheet)
