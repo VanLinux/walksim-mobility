@@ -1,0 +1,2 @@
+﻿name,mode,flow_type,demand_basis,length_m,obstacles_m,edges_m,speed_mps,slope_pct,width_m,count_ab,count_ba,duration_s,warmup_s,bin_s,seed
+Base,operation,random,count,100.0,0.2,0.3,1.2,0.0,3.0,225,150,900.0,120.0,30.0,42

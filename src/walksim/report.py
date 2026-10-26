@@ -72,10 +72,14 @@ def _items(items: list[str]) -> str:
     )
 
 
-def build_report(state: ProjectState) -> str:
+def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> str:
     if not state.project.analyst.strip():
         raise ValueError("Indique el nombre del analista en la pestaña Proyecto antes de exportar.")
-    if not state.analyses and not state.simulations:
+    if (
+        not state.analyses
+        and not state.simulations
+        and not any(c.get("analytical") for c in state.walkway.get("cases", []))
+    ):
         raise ValueError("Realice al menos un análisis o una simulación antes de exportar.")
     stamp = datetime.now(ZoneInfo("America/Mexico_City")).strftime("%d/%m/%Y %H:%M")
     parts = [
@@ -85,7 +89,7 @@ def build_report(state: ProjectState) -> str:
   {\usepackage[english]{babel}}
 \usepackage{lmodern}
 \usepackage[margin=2.2cm]{geometry}
-\usepackage{amsmath,amssymb,booktabs,longtable,array,xcolor,fancyhdr}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,xcolor,fancyhdr,graphicx}
 \usepackage[hidelinks]{hyperref}
 \definecolor{ink}{HTML}{30343B}
 \pagestyle{fancy}\fancyhf{}
@@ -142,6 +146,9 @@ en una etapa, sin cesión vehicular. No se asigna un PLOS a partir de esa demora
 Los valores no sustituyen una evaluación de seguridad vial, accesibilidad o evacuación.
 """,
     ]
+    from walksim.walkway_report import sections
+
+    parts.append(sections(state.walkway, assets))
     if state.analyses:
         parts.append("\\section{Análisis analíticos realizados}\n")
     for index, result in enumerate(state.analyses, 1):
@@ -275,4 +282,28 @@ Los criterios se han contrastado con el manual y las fuentes específicas de cad
 
 
 def write_report(state: ProjectState, path: str) -> None:
-    atomic_write(path, build_report(state))
+    from pathlib import Path
+
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    from walksim.analysis.figures import report_plot
+    from walksim.walkway_report import current_result
+
+    target = Path(path)
+    assets = {}
+    for case in state.walkway.get("cases", []):
+        result = current_result(case, "simulation")
+        if result is None:
+            continue
+        folder = target.parent / (target.stem + "_figuras")
+        folder.mkdir(exist_ok=True)
+        # IDs from user files need not be filesystem-safe; derive names from hashes.
+        import hashlib
+
+        name = "walkway_" + hashlib.sha256(case["id"].encode()).hexdigest()[:16] + ".pdf"
+        figure = report_plot(result)
+        FigureCanvasAgg(figure)
+        figure.savefig(folder / name, format="pdf", bbox_inches="tight")
+        figure.clear()
+        assets[case["id"]] = (Path(folder.name) / name).as_posix()
+    atomic_write(target, build_report(state, assets))

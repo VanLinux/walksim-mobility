@@ -1,0 +1,2 @@
+﻿name,mode,flow_type,demand_basis,length_m,obstacles_m,edges_m,speed_mps,slope_pct,flow_ab_pph,flow_ba_pph,phf,target_los,margin_pct,duration_s,warmup_s,bin_s,seed
+Base,design_width,random,hourly,100.0,0.2,0.3,1.2,0.0,900.0,600.0,0.9,C,1.0,900.0,120.0,30.0,42

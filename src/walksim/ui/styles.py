@@ -256,4 +256,19 @@ def apply_theme(app: QApplication, mode: str) -> None:
         QToolTip {{ background: {colors["surface"]}; color: {colors["ink"]};
             border: 1px solid {colors["line"]}; }}
     """
+    stylesheet += f"""
+        QLabel#workTitle {{ color: {colors["ink"]}; font-size: 22pt;
+            font-family: "Latin Modern Roman", "DejaVu Serif", serif; font-weight: 700; }}
+        QLabel#eyebrow {{ color: {colors["muted"]}; font-size: 9pt;
+            font-weight: 600; letter-spacing: 1px; }}
+        QComboBox {{ background: {colors["surface"]}; color: {colors["ink"]};
+            border: 1px solid {colors["line"]}; border-radius: 5px;
+            padding: 6px 24px 6px 8px; min-height: 21px; }}
+        QComboBox QAbstractItemView {{ background: {colors["surface"]};
+            color: {colors["ink"]}; selection-background-color: #555960;
+            selection-color: white; }}
+        QToolButton {{ color: {colors["ink"]}; padding: 7px 4px; }}
+        QPushButton:disabled {{ color: {colors["muted"]}; border-color: {colors["line"]}; }}
+        QSplitter::handle {{ background: {colors["canvas"]}; width: 6px; height: 6px; }}
+    """
     app.setStyleSheet(stylesheet)

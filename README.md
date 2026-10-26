@@ -4,10 +4,34 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
-## Versión 2.1.0
+## Versión 3.0.0 — Walkway, primera entrega
 
-La familia 2 incorpora un estudio con casos analíticos seleccionables y microsimulación
-peatonal de corredor. La interfaz permite introducir los datos manualmente o importar CSV.
+La versión 3 estrena un espacio de trabajo de corredores con **operación, diseño de
+ancho, demanda admisible y comparación de escenarios**. El formulario muestra las
+entradas pertinentes y distingue demanda horaria con PHF de conteos directos.
+
+- Cree un escenario Base y duplíquelo para evaluar alternativas.
+- Calcule LOS, ancho útil, demanda/capacidad, espacio y tiempo libre.
+- Diseñe un ancho para LOS A–E o calcule la demanda admisible con margen explícito.
+- Ejecute la microsimulación en segundo plano, con calentamiento, observación,
+  despeje, llegadas aleatorias o pelotones y semilla reproducible.
+- Compare estimaciones analíticas con mediciones y estadísticos por sentido.
+- Consulte acumulación, densidad, flujo, velocidad por intervalo y tiempos de viaje.
+- Exporte comparación y series CSV, gráficas PNG/PDF y reporte técnico LaTeX.
+- Guarde escenarios y resultados en `.wksim`; se admiten archivos de la versión 2.1.
+
+La entrega corresponde al núcleo **Walkway** acordado. Las plazas con OD local,
+mapas de calor, dispositivos de servicio, senderos compartidos y ampliaciones de
+intersecciones se desarrollarán en fases posteriores. Los análisis anteriores
+siguen disponibles en **Complementarios** y en **Corredor libre**.
+
+[Guía completa de Walkway 3, método y límites](docs/WALKWAY3.md).
+Abra [el estudio de comparación](examples/Walkway3_Comparacion.wksim) para revisar
+alternativas sintéticas y una microsimulación registrada. En
+[examples/csv](examples/csv) se incluyen las plantillas `walkway3_*.csv`.
+
+La exportación LaTeX de Walkway genera una carpeta `nombre_figuras` con gráficos
+vectoriales: cópiela junto al `.tex` al trasladar el informe.
 
 ## Guardar y recuperar avances
 
@@ -56,8 +80,9 @@ Sus datos son ejemplos sintéticos y su analista es «Analista de ejemplo».
 ha indicado. Incluye identificación, notas, todos los casos calculados, entradas,
 ecuaciones, desarrollo, resultados, límites LOS, hipótesis y referencias. También
 incluye las microsimulaciones con parámetros propios, semilla y versión exacta del motor.
-Se excluyen borradores no calculados. El documento es autónomo, en tamaño carta,
-sin archivos auxiliares de datos ni bibliografía externa.
+Se excluyen borradores no calculados. El documento usa tamaño carta y no necesita bibliografía externa. Los análisis
+históricos se exportan sin recursos gráficos externos. Para Walkway 3 se genera
+una carpeta de figuras PDF que debe conservarse junto al archivo `.tex`.
 
 Para compilar (opcional, la exportación no necesita LaTeX):
 
@@ -70,7 +95,7 @@ Se necesitan los paquetes LaTeX habituales (amsmath, longtable, booktabs, lmoder
 xcolor, fancyhdr e hyperref). Si está disponible, se usa babel en español;
 con una instalación mínima se conserva el texto español y se usa babel en inglés.
 
-## Interfaz de la versión 2
+## Interfaz
 
 - Menú **Apariencia → Modo claro / Modo oscuro**; la elección se conserva al cerrar.
 - Ventana inicial ajustada al espacio disponible de la pantalla.
@@ -134,10 +159,33 @@ https://eclipse.dev/sumo/docs/Simulation/Pedestrians.html
 git clone https://github.com/VanLinux/walksim-mobility.git
 cd walksim-mobility
 
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
 ```
+
+## Actualización desde la versión 2.1
+
+Cierre la aplicación y ejecute en Linux:
+
+```bash
+cd ~/walksim-mobility
+source .venv/bin/activate
+git pull --ff-only
+python -m pip install -e .
+walksim
+```
+
+En Windows (PowerShell), dentro del repositorio, puede evitar la activación:
+
+```powershell
+git pull --ff-only
+.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\python.exe -m walksim
+```
+
+La actualización incorpora Matplotlib para gráficas; SUMO y `netconvert` continúan
+siendo ejecutables externos disponibles en PATH.
 
 ## Ejecución
 

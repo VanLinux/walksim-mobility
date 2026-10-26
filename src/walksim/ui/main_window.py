@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
     QBoxLayout,
+    QDialog,
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
@@ -48,6 +49,7 @@ from walksim.report import write_report
 from walksim.sumo.runner import run_corridor_simulation
 from walksim.ui.analysis_widget import AnalysisWidget
 from walksim.ui.styles import apply_theme, theme_colors
+from walksim.ui.walkway_widget import WalkwayWidget
 
 
 class SimulationWorker(QThread):
@@ -168,6 +170,7 @@ class MainWindow(QMainWindow):
         self._connect_project_signals()
         self._loading = False
         self._set_clean()
+        self.tabs.setCurrentIndex(2)
 
     def _create_actions(self) -> None:
         self.new_action = QAction("Nuevo estudio", self)
@@ -187,11 +190,18 @@ class MainWindow(QMainWindow):
 
         self.simulate_action = QAction("Simular ejemplo", self)
         self.simulate_action.setToolTip(
-            "Ejecuta el corredor con los parámetros actuales; los valores iniciales son un ejemplo."
+            "Añade y ejecuta un escenario de ejemplo sin reemplazar sus alternativas."
         )
-        self.simulate_action.setShortcut("F5")
-        self.simulate_action.triggered.connect(self.simulate)
 
+        self.simulate_action.triggered.connect(self.simulate_example)
+
+        self.execute_action = QAction("Ejecutar escenario Walkway", self)
+        self.execute_action.setShortcut("F5")
+        self.execute_action.triggered.connect(lambda: self.walkway_widget.simulate())
+        self.manual_action = QAction("Guía de uso", self)
+        self.manual_action.triggered.connect(self.show_guide)
+        self.method_action = QAction("Metodología Walkway", self)
+        self.method_action.triggered.connect(lambda: self.show_guide(methodology=True))
         self.about_action = QAction("Acerca de WalkSim Mobility", self)
         self.about_action.triggered.connect(self.show_about)
 
@@ -217,14 +227,23 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.report_action)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_action)
+        analysis_menu = self.menuBar().addMenu("Análisis")
+        for label, index in (
+            ("Walkway · operación y diseño", 2),
+            ("Análisis complementarios", 3),
+            ("Corredor libre", 4),
+        ):
+            action = analysis_menu.addAction(label)
+            action.triggered.connect(lambda _checked, i=index: self.tabs.setCurrentIndex(i))
         simulation_menu = self.menuBar().addMenu("Simulación")
+        simulation_menu.addAction(self.execute_action)
         simulation_menu.addAction(self.simulate_action)
 
         appearance_menu = self.menuBar().addMenu("Apariencia")
         appearance_menu.addActions(self.theme_actions.actions())
 
         help_menu = self.menuBar().addMenu("Ayuda")
-        help_menu.addAction(self.about_action)
+        help_menu.addActions([self.manual_action, self.method_action, self.about_action])
 
     def _build_ui(self) -> None:
         central = QWidget()
@@ -239,7 +258,7 @@ class MainWindow(QMainWindow):
 
         title = QLabel("WalkSim Mobility")
         title.setObjectName("pageTitle")
-        subtitle = QLabel("Simulación y análisis de movilidad peatonal")
+        subtitle = QLabel("Ingeniería peatonal · operación, diseño y microsimulación")
         subtitle.setObjectName("pageSubtitle")
         subtitle.setWordWrap(True)
 
@@ -271,6 +290,16 @@ class MainWindow(QMainWindow):
         self.tabs.insertTab(2, self._scrollable(self.analysis_widget), "3  Análisis peatonal")
         self.tabs.setTabText(3, "4  Microsimulación")
         self.tabs.setTabText(4, "5  Resultados simulados")
+        self.walkway_widget = WalkwayWidget()
+        self.tabs.insertTab(2, self._scrollable(self.walkway_widget), "3  Walkway")
+        self.tabs.setTabText(0, "Inicio")
+        self.tabs.setTabText(1, "Proyecto")
+        self.tabs.setTabText(2, "Walkway")
+        self.tabs.setTabText(3, "Complementarios")
+        self.tabs.setTabText(4, "Corredor libre")
+        self.tabs.setTabText(5, "Resultados del corredor")
+        self.walkway_widget.busyChanged.connect(self._walkway_busy)
+        self.walkway_widget.set_dark(self.theme == "dark")
         root.addWidget(self.tabs, 1)
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
@@ -327,9 +356,10 @@ class MainWindow(QMainWindow):
             </table>
 
             <div class="panel">
-              <b>Estudios peatonales de la versión 2</b><br>
-              Aceras, senderos, pelotones, áreas de espera, escaleras y demora de cruces.
-              Microsimulación de corredor recto bidireccional con resultados por sentido.
+              <b>WalkSim 3.0 · Walkway</b><br>
+              Evalúe un corredor o calcule el ancho y la demanda admisible para un LOS objetivo.
+              Duplique el escenario Base, cambie sus datos y compare las alternativas.
+              Los análisis de la versión 2.1 siguen disponibles en Complementarios.
             </div>
             <h2>Flujo de trabajo</h2>
             <ol>
@@ -608,6 +638,7 @@ class MainWindow(QMainWindow):
         self._refresh_scope_text()
         self.scope_browser.verticalScrollBar().setValue(position)
         self.preview.update()
+        self.walkway_widget.set_dark(mode == "dark")
 
     def resizeEvent(self, event) -> None:  # noqa: N802
         super().resizeEvent(event)
@@ -616,6 +647,8 @@ class MainWindow(QMainWindow):
 
     def _apply_responsive_layout(self) -> None:
         width = self.width()
+        if hasattr(self, "walkway_widget"):
+            self.walkway_widget.adapt(width)
         compact = width < 900
         self.corridor_splitter.setOrientation(
             Qt.Orientation.Vertical if compact else Qt.Orientation.Horizontal
@@ -657,6 +690,8 @@ class MainWindow(QMainWindow):
     def _set_busy(self, busy: bool) -> None:
         self.progress.setVisible(busy)
         self.corridor_tab.setEnabled(not busy)
+        self.walkway_widget.setEnabled(not busy)
+        self.execute_action.setEnabled(not busy)
         self.simulate_action.setEnabled(not busy)
         self.rerun_button.setEnabled(not busy)
         for action in (
@@ -757,7 +792,7 @@ class MainWindow(QMainWindow):
             + "</p>"
         )
 
-        self.tabs.setCurrentIndex(4)
+        self.tabs.setCurrentIndex(5)
         self.statusBar().showMessage("Simulación completada")
 
     def _set_result_row(self, row: int, label: str, result: DirectionResult) -> None:
@@ -791,6 +826,7 @@ class MainWindow(QMainWindow):
         ):
             widget.valueChanged.connect(self._mark_dirty)
         self.analysis_widget.changed.connect(self._mark_dirty)
+        self.walkway_widget.changed.connect(self._mark_dirty)
 
     def _mark_dirty(self, *_args) -> None:
         if not self._loading:
@@ -816,6 +852,7 @@ class MainWindow(QMainWindow):
             self.analysis_widget.names,
             self.analysis_widget.results,
             self.simulation_records,
+            self.walkway_widget.export_state(),
         )
 
     def save_to_path(self, path: str | Path) -> Path:
@@ -898,6 +935,7 @@ class MainWindow(QMainWindow):
         self.analysis_widget.restore(
             state.active_method, state.drafts, state.draft_names, state.analyses
         )
+        self.walkway_widget.restore(state.walkway)
         self.simulation_records = state.simulations
         self.last_output_dir = None
         if self.simulation_records:
@@ -909,7 +947,7 @@ class MainWindow(QMainWindow):
             self.result_status.setText("Aún no se ha ejecutado una simulación.")
             self.output_label.clear()
             self.measurement_browser.clear()
-        self.tabs.setCurrentIndex(1)
+        self.tabs.setCurrentIndex(2 if state.walkway else 1)
         self._loading = False
 
     def new_project(self, *_args) -> None:
@@ -927,7 +965,11 @@ class MainWindow(QMainWindow):
             if not accepted or not analyst.strip():
                 return
             self.project_analyst.setText(analyst.strip())
-        if not self.analysis_widget.results and not self.simulation_records:
+        if (
+            not self.analysis_widget.results
+            and not self.simulation_records
+            and not any(case.get("analytical") for case in self.walkway_widget.cases)
+        ):
             QMessageBox.information(
                 self, "Reporte", "Calcule un análisis o ejecute una simulación."
             )
@@ -1017,7 +1059,7 @@ class MainWindow(QMainWindow):
         for widget, value in pairs:
             widget.setValue(value)
         self._update_preview()
-        self.tabs.setCurrentIndex(3)
+        self.tabs.setCurrentIndex(4)
         self._mark_dirty()
 
     def closeEvent(self, event) -> None:  # noqa: N802
@@ -1031,6 +1073,87 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
+
+    def simulate_example(self, *_args) -> None:
+        from walksim.domain.walkway import new_case
+
+        panel = self.walkway_widget
+        if self._busy:
+            return
+        if len(panel.cases) >= 30:
+            QMessageBox.information(self, "Escenarios", "El estudio admite máximo 30 escenarios.")
+            return
+        example = new_case("Ejemplo de corredor")
+        panel.cases.append(example)
+        panel.selected_id = example["id"]
+        panel._refresh_selector()
+        panel._load_current()
+        self.tabs.setCurrentIndex(2)
+        self._mark_dirty()
+        panel.simulate()
+
+    def _walkway_busy(self, busy: bool) -> None:
+        self._busy = busy
+        self._set_busy(busy)
+        self.statusBar().showMessage(
+            "Ejecutando escenario Walkway…" if busy else "Escenario Walkway listo para revisar"
+        )
+
+    def show_guide(self, *_args, methodology: bool = False) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Metodología" if methodology else "Guía de uso · WalkSim 3")
+        dialog.resize(
+            min(760, self.screen().availableGeometry().width()),
+            min(640, self.screen().availableGeometry().height()),
+        )
+        layout = QVBoxLayout(dialog)
+        browser = QTextBrowser()
+        if methodology:
+            browser.setHtml(
+                "<h1>Walkway · método y mediciones</h1>"
+                "<p>HCM 7, capítulo 24, tablas 24-1 y 24-2: LOS por espacio peatonal, "
+                "con umbrales convertidos exactamente a SI.</p>"
+                "<p>Qd = Qh / PHF para demanda horaria. Si se proporciona un conteo directo, "
+                "se usa Qd = 60N/T sin volver a aplicar PHF. T es 15 min en flujo aleatorio "
+                "y 5 min para pelotones. Un PHF de 15 min no sustituye el conteo de 5 min.</p>"
+                "<p>q = Qd/(60 WE), D = q/(60 S), M = 1/D. El diseño inverso busca un ancho "
+                "o demanda admisible con margen para cumplir un LOS objetivo o mejor. "
+                "Depende de la velocidad introducida; no predice ni calibra esa velocidad.</p>"
+                "<p>La ocupación se integra durante el periodo observado posterior al "
+                "calentamiento. "
+                "Los tiempos corresponden a la cohorte que entra en ese periodo y termina antes "
+                "del fin del despeje. El LOS simulado es indicativo del promedio global.</p>"
+                "<p>La pendiente ≤5 % se documenta con la velocidad introducida. Los obstáculos "
+                "reducen el ancho útil uniforme; no se dibujan como obstáculos puntuales. "
+                "El ancho calculado no sustituye mínimos normativos de accesibilidad.</p>"
+            )
+        else:
+            browser.setHtml(
+                "<h1>Su primer estudio Walkway</h1>"
+                "<ol><li>En Proyecto, indique nombre, ubicación y analista.</li>"
+                "<li>En Walkway elija evaluar operación, diseñar ancho o calcular "
+                "demanda admisible.</li>"
+                "<li>Introduzca la geometría y la demanda horaria con PHF, o el conteo "
+                "directo.</li>"
+                "<li>Pulse Calcular escenario. Revise LOS, ancho útil y demanda/capacidad.</li>"
+                "<li>Use Duplicar escenario para crear alternativas y la pestaña "
+                "Comparar para evaluarlas.</li>"
+                "<li>Despliegue Opciones de microsimulación para ajustar "
+                "calentamiento, periodo y semilla. "
+                "Pulse Ejecutar microsimulación para obtener la comparación y las gráficas.</li>"
+                "<li>En Archivo guarde .wksim y exporte el reporte .tex. Los archivos "
+                "2.1 se pueden abrir; "
+                "guarde una copia en formato 3 para conservar el original.</li></ol>"
+                "<p>Los cambios de datos marcan los resultados como pendientes de actualización. "
+                "Los valores predeterminados se distinguen de los introducidos u observados.</p>"
+                "<p>La versión 3.0 corresponde a la primera entrega Walkway; las plazas, "
+                "dispositivos de servicio y senderos compartidos son ampliaciones posteriores.</p>"
+            )
+        layout.addWidget(browser)
+        close = QPushButton("Cerrar")
+        close.clicked.connect(dialog.accept)
+        layout.addWidget(close)
+        dialog.exec()
 
     def show_about(self) -> None:
         QMessageBox.about(

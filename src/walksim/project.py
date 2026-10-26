@@ -13,6 +13,7 @@ from typing import Any
 from walksim import __version__
 from walksim.domain.analysis import METHODS, calculate
 from walksim.domain.models import CorridorScenario, DirectionResult, ProjectInfo
+from walksim.domain.walkway import validate_study
 
 MAX_FILE_BYTES = 8 * 1024 * 1024
 
@@ -26,11 +27,12 @@ class ProjectState:
     draft_names: dict[str, str] = field(default_factory=dict)
     analyses: list[dict] = field(default_factory=list)
     simulations: list[dict] = field(default_factory=list)
+    walkway: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "format": "WalkSim Mobility Project",
-            "schema_version": 1,
+            "schema_version": 3,
             "software_version": __version__,
             **asdict(self),
         }
@@ -73,7 +75,7 @@ def state_from_dict(data: Any) -> ProjectState:
     try:
         if not isinstance(data, dict) or data.get("format") != "WalkSim Mobility Project":
             raise ValueError("El archivo no es un proyecto WalkSim Mobility.")
-        if data.get("schema_version") != 1:
+        if data.get("schema_version") not in (1, 3):
             raise ValueError("Versión de formato .wksim no compatible.")
         _finite_tree(data)
         project = ProjectInfo(**data["project"])
@@ -159,7 +161,10 @@ def state_from_dict(data: Any) -> ProjectState:
                 isinstance(v, str) for v in row.get("assumptions", [])
             ):
                 raise ValueError("Supuestos de simulación no válidos.")
-        return ProjectState(project, corridor, active, drafts, names, validated, simulations)
+        walkway = validate_study(data.get("walkway", {}))
+        return ProjectState(
+            project, corridor, active, drafts, names, validated, simulations, walkway
+        )
     except (KeyError, TypeError, AttributeError, OverflowError) as exc:
         raise ValueError("Estructura del archivo .wksim incompleta o incorrecta.") from exc
 
@@ -173,6 +178,15 @@ def save_project(state: ProjectState, path: str | Path) -> Path:
     text = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     if len(text.encode("utf-8")) > MAX_FILE_BYTES:
         raise ValueError("El proyecto excede 8 MiB. Divida el estudio en varios archivos.")
+    if target.exists():
+        try:
+            old = json.loads(target.read_text(encoding="utf-8-sig"))
+            if isinstance(old, dict) and old.get("schema_version") == 1:
+                backup = target.with_name(target.stem + ".v2-backup.wksim")
+                if not backup.exists():
+                    atomic_write(backup, target.read_text(encoding="utf-8-sig"))
+        except (json.JSONDecodeError, UnicodeError):
+            pass
     atomic_write(target, text + "\n")
     return target
 

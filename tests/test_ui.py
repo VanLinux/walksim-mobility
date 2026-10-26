@@ -48,7 +48,7 @@ def test_theme_persists_without_changing_scenario(window):
 def test_small_screen_navigation_and_controls(window, width, height, columns):
     widget, app = window
     widget.resize(width, height)
-    for index in range(5):
+    for index in range(6):
         widget.tabs.setCurrentIndex(index)
         app.processEvents()
     assert widget.width() == width
@@ -58,14 +58,14 @@ def test_small_screen_navigation_and_controls(window, width, height, columns):
         assert position[:2] == (index // columns, index % columns)
     expected = Qt.Orientation.Vertical if width < 900 else Qt.Orientation.Horizontal
     assert widget.corridor_splitter.orientation() == expected
-    widget.tabs.setCurrentIndex(3)
+    widget.tabs.setCurrentIndex(4)
     app.processEvents()
-    scroll = widget.tabs.widget(3)
+    scroll = widget.tabs.widget(4)
     scroll.ensureWidgetVisible(widget.seed_spin)
     app.processEvents()
     center = widget.seed_spin.mapTo(scroll.viewport(), widget.seed_spin.rect().center())
     assert scroll.viewport().rect().contains(center)
-    widget.tabs.setCurrentIndex(4)
+    widget.tabs.setCurrentIndex(5)
     app.processEvents()
     if width < 1000:
         assert widget.results_table.horizontalScrollBar().maximum() > 0
@@ -90,7 +90,7 @@ def test_simulation_result_still_opens_results_tab(window, monkeypatch, tmp_path
     while widget._busy and time.monotonic() < deadline:
         _app.processEvents()
     assert not widget._busy
-    assert widget.tabs.currentIndex() == 4
+    assert widget.tabs.currentIndex() == 5
     assert widget.last_output_dir == tmp_path
     assert widget.results_table.item(2, 0).text() == "Total"
 
@@ -194,4 +194,65 @@ def test_analysis_to_simulation_transfer_uses_effective_width_and_explicit_share
     assert widget.width_spin.value() == 2.5
     assert widget.flow_ab_spin.value() == 1080
     assert widget.flow_ba_spin.value() == 720
-    assert widget.tabs.currentIndex() == 3
+    assert widget.tabs.currentIndex() == 4
+
+
+def test_walkway_design_modes_invalidate_outputs_and_save_partial_drafts(window, tmp_path):
+    from PySide6.QtTest import QTest
+
+    widget, app = window
+    panel = widget.walkway_widget
+    panel.fields["mode"].setCurrentIndex(panel.fields["mode"].findData("design_width"))
+    assert panel.calculate()
+    assert panel.current["analytical"]["metrics"]["LOS operativo"] in "ABC"
+    assert panel.fresh(panel.current, "analytical")
+    entry = panel.fields["speed_mps"]
+    entry.selectAll()
+    QTest.keyClicks(entry, "1.3")
+    app.processEvents()
+    assert not panel.fresh(panel.current, "analytical")
+    assert panel.current["origins"]["speed_mps"] == "entered"
+    entry.selectAll()
+    QTest.keyClick(entry, Qt.Key.Key_Backspace)
+    app.processEvents()
+    path = widget.save_to_path(tmp_path / "draft3.wksim")
+    widget.load_from_path(path)
+    assert panel.fields["speed_mps"].text() == ""
+    assert panel.current["analytical"] is not None
+    assert not panel.fresh(panel.current, "analytical")
+
+
+def test_walkway_alternatives_are_independent_and_compared(window, monkeypatch):
+    widget, _app = window
+    panel = widget.walkway_widget
+    panel.calculate()
+    original = panel.current["id"]
+    monkeypatch.setattr(
+        "walksim.ui.walkway_widget.QInputDialog.getText",
+        lambda *_args, **_kwargs: ("Alternativa ancha", True),
+    )
+    panel.duplicate_case()
+    assert len(panel.cases) == 2 and panel.selected_id != original
+    panel.fields["width_m"].setText("4")
+    panel._edited("width_m")
+    assert panel.cases[0]["inputs"]["width_m"] != panel.current["inputs"]["width_m"]
+    panel.compare_all()
+    assert panel.compare_table.rowCount() == 2
+    assert all(panel.fresh(case, "analytical") for case in panel.cases)
+    panel.fields["flow_type"].setCurrentIndex(panel.fields["flow_type"].findData("platoon"))
+    assert panel.fields["demand_basis"].currentData() == "count"
+
+
+def test_walkway_controls_remain_accessible_at_small_size(window):
+    widget, app = window
+    widget.resize(480, 360)
+    widget.tabs.setCurrentIndex(2)
+    app.processEvents()
+    panel = widget.walkway_widget
+    assert widget.size().toTuple() == (480, 360)
+    assert panel.more_button.isVisible()
+    assert panel.splitter.orientation() == Qt.Orientation.Vertical
+    outer = widget.tabs.widget(2)
+    outer.ensureWidgetVisible(panel.splitter)
+    app.processEvents()
+    assert outer.verticalScrollBar().maximum() > 0

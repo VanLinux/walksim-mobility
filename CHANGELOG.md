@@ -1,5 +1,28 @@
 # Historial de cambios
 
+## 3.0.0 — 25 de octubre de 2026 · Walkway, primera entrega
+
+- Nuevo espacio de trabajo Walkway, con modos operacional, diseño de ancho y
+  demanda admisible para un LOS objetivo, PHF o conteo directo sin doble ajuste.
+- Escenarios Base y alternativas independientes, comparación tabular y exportación CSV.
+- Diseño con límites LOS estrictos, margen explícito y redondeo de ancho hacia arriba.
+- Llegadas aleatorias Poisson o pelotones parametrizados, cohorte de observación,
+  calentamiento, despeje y estadísticas de recorrido por sentido y percentiles.
+- Series de acumulación, densidad, flujo y velocidad de recorridos finalizados;
+  histograma de tiempos y exportación de gráficas PNG/PDF y series CSV.
+- Comparación analítico–simulado con definiciones y N/A; LOS espacial global indicativo.
+- Procedencia de datos y control de resultados desactualizados mediante firmas de entradas.
+- Formato `.wksim` esquema 3 con escenarios y gráficos; lectura de esquema 1 y copia
+  de respaldo automática al convertir un archivo 2.1 sobre su ubicación original.
+- Reporte LaTeX ampliado con diseño, alternativas, trazabilidad y figuras PDF vectoriales.
+- Interfaz neutral en claro/oscuro, paneles adaptables, guía de uso y metodología integradas.
+- Acción Simular ejemplo crea un caso independiente sin reemplazar el estudio.
+- Conservados los siete métodos 2.1, sus CSV y la microsimulación libre del corredor.
+- Añadidos Matplotlib y datos de zona horaria para Windows; guías de instalación y actualización.
+- Esta entrega no implementa aún plazas con OD/heatmaps, accesos de servicio,
+  senderos compartidos ni nuevas microsimulaciones de escaleras o intersecciones.
+
+
 ## 2.1.0 — 24 de octubre de 2026 (familia 2)
 
 - Retirada la barra de accesos a Nuevo, Abrir, Guardar y Exportar; las acciones
