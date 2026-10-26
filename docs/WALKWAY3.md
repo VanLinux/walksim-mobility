@@ -225,3 +225,6 @@ real de SUMO con semilla y versión registradas. No son observaciones de campo.
 - TRB (2022), HCM 7, capítulo 24, tablas 24-1 y 24-2; ecuaciones 24-1 a 24-4.
 - Metodología histórica y conversiones: [METHODOLOGY.md](METHODOLOGY.md).
 - SUMO: <https://sumo.dlr.de/docs/Simulation/Pedestrians.html> y salidas peatonales.
+
+Desde WalkSim 3.3 los proyectos nuevos usan esquema 6 para incluir Senderos compartidos;
+se mantiene la lectura de los esquemas de esta guía.

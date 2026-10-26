@@ -171,3 +171,6 @@ casos ya ejecutados.
 - [PlainXML y formas de walkingArea](https://sumo.dlr.de/docs/Networks/PlainXML.html).
 - [FCDOutput](https://sumo.dlr.de/docs/Simulation/Output/FCDOutput.html).
 - [TripInfo y personinfo](https://sumo.dlr.de/docs/Simulation/Output/TripInfo.html).
+
+Desde WalkSim 3.3 los proyectos nuevos usan esquema 6 para incluir Senderos compartidos;
+se mantiene la lectura de los esquemas de esta guía.

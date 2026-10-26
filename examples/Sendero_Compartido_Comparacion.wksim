@@ -1,0 +1,1051 @@
+{
+  "format": "WalkSim Mobility Project",
+  "schema_version": 6,
+  "software_version": "3.3.0",
+  "project": {
+    "name": "Sendero compartido · alternativas de ancho",
+    "location": "Tramo sintético",
+    "analyst": "Analista de ejemplo",
+    "notes": "Datos sintéticos. Los 100 intentos y 20 demorados son ejemplos, no observaciones reales. Se conserva la misma probabilidad para aislar el efecto del término ancho; BLOS es condicional. Los eventos simulados no sustituyen esas probabilidades."
+  },
+  "corridor": {
+    "length_m": 100.0,
+    "width_m": 2.5,
+    "flow_ab_pph": 600.0,
+    "flow_ba_pph": 400.0,
+    "walking_speed_mps": 1.34,
+    "analysis_time_s": 3600.0,
+    "seed": 42
+  },
+  "active_method": "walkway",
+  "drafts": {},
+  "draft_names": {},
+  "analyses": [],
+  "simulations": [],
+  "walkway": {},
+  "access": {},
+  "plaza": {},
+  "shared": {
+    "cases": [
+      {
+        "id": "5bad17c364ac4aa8aa66082367407731",
+        "name": "Sendero 3.048 m",
+        "inputs": {
+          "task": "both",
+          "basis": "hourly",
+          "arrival": "random",
+          "centerline": "no",
+          "delay_source": "counts",
+          "length_m": 200.0,
+          "width_m": 3.048,
+          "phf": 0.85,
+          "ped_ab": 100.0,
+          "ped_ba": 100.0,
+          "bike_ab": 150.0,
+          "bike_ba": 150.0,
+          "count_ped_ab": 25,
+          "count_ped_ba": 25,
+          "count_bike_ab": 38,
+          "count_bike_ba": 38,
+          "ped_speed": 1.519936,
+          "bike_speed": 5.722112,
+          "ped_sd": 0.268224,
+          "bike_sd": 1.519936,
+          "attempts_ab": 100,
+          "attempts_ba": 100,
+          "delayed_ab": 20,
+          "delayed_ba": 20,
+          "probability_ab": "",
+          "probability_ba": "",
+          "duration_s": 300.0,
+          "warmup_s": 120.0,
+          "clearance_s": 600.0,
+          "bin_s": 30.0,
+          "seed": 42
+        },
+        "origins": {
+          "task": "default",
+          "basis": "default",
+          "arrival": "default",
+          "centerline": "default",
+          "delay_source": "default",
+          "length_m": "default",
+          "width_m": "default",
+          "phf": "default",
+          "ped_ab": "default",
+          "ped_ba": "default",
+          "bike_ab": "default",
+          "bike_ba": "default",
+          "count_ped_ab": "default",
+          "count_ped_ba": "default",
+          "count_bike_ab": "default",
+          "count_bike_ba": "default",
+          "ped_speed": "default",
+          "bike_speed": "default",
+          "ped_sd": "default",
+          "bike_sd": "default",
+          "attempts_ab": "default",
+          "attempts_ba": "default",
+          "delayed_ab": "default",
+          "delayed_ba": "default",
+          "probability_ab": "default",
+          "probability_ba": "default",
+          "duration_s": "default",
+          "warmup_s": "default",
+          "clearance_s": "default",
+          "bin_s": "default",
+          "seed": "default"
+        },
+        "analytical": {
+          "inputs": {
+            "task": "both",
+            "basis": "hourly",
+            "arrival": "random",
+            "centerline": "no",
+            "delay_source": "counts",
+            "length_m": 200.0,
+            "width_m": 3.048,
+            "phf": 0.85,
+            "ped_ab": 100.0,
+            "ped_ba": 100.0,
+            "bike_ab": 150.0,
+            "bike_ba": 150.0,
+            "count_ped_ab": 25,
+            "count_ped_ba": 25,
+            "count_bike_ab": 38,
+            "count_bike_ba": 38,
+            "ped_speed": 1.519936,
+            "bike_speed": 5.722112,
+            "ped_sd": 0.268224,
+            "bike_sd": 1.519936,
+            "attempts_ab": 100,
+            "attempts_ba": 100,
+            "delayed_ab": 20,
+            "delayed_ba": 20,
+            "probability_ab": "",
+            "probability_ba": "",
+            "duration_s": 300.0,
+            "warmup_s": 120.0,
+            "clearance_s": 600.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "506603b2133082414f30b006f742b6a434fecb597eb9cab5a39f34984b95da42",
+          "flows": {
+            "P.AB": 117.64705882352942,
+            "P.BA": 117.64705882352942,
+            "B.AB": 176.47058823529412,
+            "B.BA": 176.47058823529412
+          },
+          "directions": [
+            {
+              "direction": "AB",
+              "pedestrian": {
+                "passing_h": 129.59558823529412,
+                "meeting_h": 223.34558823529412,
+                "weighted_h": 241.26838235294116,
+                "los": "F"
+              },
+              "bicycle": {
+                "active_min": 5.73479519426787,
+                "meetings_min": 14.911110226724059,
+                "weighted_min": 72.25906216940277,
+                "probability_delay": 0.2,
+                "delayed_min": 0.974915183025538,
+                "delay_factor": 0.487457591512769,
+                "score": 2.787966595536762,
+                "raw_los": "D",
+                "los": "D",
+                "reason": ""
+              }
+            },
+            {
+              "direction": "BA",
+              "pedestrian": {
+                "passing_h": 129.59558823529412,
+                "meeting_h": 223.34558823529412,
+                "weighted_h": 241.26838235294116,
+                "los": "F"
+              },
+              "bicycle": {
+                "active_min": 5.73479519426787,
+                "meetings_min": 14.911110226724059,
+                "weighted_min": 72.25906216940277,
+                "probability_delay": 0.2,
+                "delayed_min": 0.974915183025538,
+                "delay_factor": 0.487457591512769,
+                "score": 2.787966595536762,
+                "raw_los": "D",
+                "los": "D",
+                "reason": ""
+              }
+            }
+          ],
+          "warnings": [
+            "BLOS condicionado a la probabilidad de demora introducida. Al cambiar ancho o demanda revise esa probabilidad."
+          ],
+          "assumptions": [
+            "HCM 7, capítulo 24: PLOS usa Fp = qb,s(1−Sp/Sb), Fm = qb,o(1+Sp/Sb) y F = Fp+0.5Fm; tasas de diseño ajustadas una sola vez por PHF o conteo de 15 min multiplicado por cuatro.",
+            "PLOS se evalúa para un peatón representativo por sentido. No se asigna PLOS de un sentido sin demanda peatonal; los eventos y el LOS no constituyen una medida de seguridad.",
+            "BLOS calcula reuniones y rebases activos con distribuciones normales de velocidad, integración trapezoidal en segmentos de hasta 0.01 mi y dos grupos: peatones y bicicletas. Corredores, patinadores y bicicletas infantiles se suponen ausentes.",
+            "La probabilidad de rebase demorado procede de intentos y demorados observados, o de un valor documentado por el analista. Sustituye la estimación de bloqueo de los pasos 4–5 del HCM. No se estima automáticamente con el ancho ni se toma de la microsimulación.",
+            "El BLOS se informa sólo con probabilidad de demora disponible y ancho entre 8 y 20 ft (2.4384–6.096 m), para sendero pavimentado sin separación por modo. Cambiar el ancho manteniendo la misma probabilidad produce una comparación condicional.",
+            "DPm = AT × PT × PHF conserva la corrección de calibración del HCM incluso con conteos de 15 min: en esa modalidad PHF sólo se requiere para DPm de BLOS.",
+            "SUMO usa bicicletas como vehículos, peatones striping y movimiento lateral por subcarriles. La sección se representa por dos mitades direccionales compartidas por ambos modos, con posibilidad de rebase por la mitad contraria según las reglas del motor.",
+            "La línea central interviene en la regresión BLOS; la simulación mantiene las dos mitades direccionales y no interpreta esa línea como una prohibición de rebase.",
+            "Encuentros y rebases simulados se detectan al cambiar el orden longitudinal de dos usuarios presentes en muestras consecutivas de 0.5 s. Se cuenta cada par una sola vez y se excluye el calentamiento; son eventos geométricos, no colisiones ni validación del LOS.",
+            "Las velocidades individuales deseadas son normales recortadas al rango 0.2–15 m/s; en modo Sólo PLOS se usan velocidades constantes. Estos perfiles de simulación no calibran la distribución analítica de velocidades ni representan un modelo ciclista validado.",
+            "Las estadísticas de viaje corresponden a la cohorte generada durante observación que completa antes del límite de despeje. Se informan pendientes y tamaño de muestra.",
+            "CROW se usa como marco cualitativo de convivencia y separación. No se asignan mínimos normativos ni se automatiza su metodología de diseño de redes."
+          ],
+          "created_at": "2026-10-26T06:07:44.527335+00:00"
+        },
+        "simulation": {
+          "summary": {
+            "generated": 86,
+            "started": 86,
+            "completed": 86,
+            "pending": 0,
+            "cohort_generated": 53,
+            "cohort_completed": 53,
+            "meetings_pb": 372,
+            "passes_bp": 17,
+            "meetings_bb": 190,
+            "passes_bb": 6,
+            "clearance_s": 190.5
+          },
+          "groups": {
+            "P.AB": {
+              "generated": 20,
+              "completed": 20,
+              "cohort_completed": 15,
+              "mean_trip_s": 143.7018918139634,
+              "p95_trip_s": 191.18610356347648,
+              "speed_mps": 1.390378355343166,
+              "mean_loss_s": 15.516666666666667
+            },
+            "P.BA": {
+              "generated": 16,
+              "completed": 16,
+              "cohort_completed": 11,
+              "mean_trip_s": 166.61088175861732,
+              "p95_trip_s": 214.52338503112216,
+              "speed_mps": 1.199201384033646,
+              "mean_loss_s": 17.74
+            },
+            "B.AB": {
+              "generated": 25,
+              "completed": 25,
+              "cohort_completed": 15,
+              "mean_trip_s": 135.23722014319023,
+              "p95_trip_s": 182.50360063574345,
+              "speed_mps": 1.4663123050742866,
+              "mean_loss_s": 95.66066666666667
+            },
+            "B.BA": {
+              "generated": 25,
+              "completed": 25,
+              "cohort_completed": 12,
+              "mean_trip_s": 131.3364991544981,
+              "p95_trip_s": 184.90946693795001,
+              "speed_mps": 1.509862081573601,
+              "mean_loss_s": 98.30916666666667
+            }
+          },
+          "series": [
+            {
+              "time_s": 0.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 10.033333333333333,
+              "bike_occupancy": 12.033333333333333,
+              "meetings_pb": 36,
+              "passes_bp": 1,
+              "meetings_bb": 23,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 30.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 11.416666666666666,
+              "bike_occupancy": 13.15,
+              "meetings_pb": 37,
+              "passes_bp": 3,
+              "meetings_bb": 21,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 60.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 13.316666666666666,
+              "bike_occupancy": 13.966666666666667,
+              "meetings_pb": 32,
+              "passes_bp": 3,
+              "meetings_bb": 15,
+              "passes_bb": 1
+            },
+            {
+              "time_s": 90.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 15.133333333333333,
+              "bike_occupancy": 14.116666666666667,
+              "meetings_pb": 57,
+              "passes_bp": 1,
+              "meetings_bb": 28,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 120.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 14.15,
+              "bike_occupancy": 10.483333333333333,
+              "meetings_pb": 17,
+              "passes_bp": 3,
+              "meetings_bb": 10,
+              "passes_bb": 1
+            },
+            {
+              "time_s": 150.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 14.516666666666667,
+              "bike_occupancy": 11.15,
+              "meetings_pb": 50,
+              "passes_bp": 0,
+              "meetings_bb": 16,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 180.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 17.216666666666665,
+              "bike_occupancy": 12.25,
+              "meetings_pb": 40,
+              "passes_bp": 4,
+              "meetings_bb": 18,
+              "passes_bb": 2
+            },
+            {
+              "time_s": 210.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 14.2,
+              "bike_occupancy": 16.533333333333335,
+              "meetings_pb": 45,
+              "passes_bp": 1,
+              "meetings_bb": 24,
+              "passes_bb": 1
+            },
+            {
+              "time_s": 240.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 12.283333333333333,
+              "bike_occupancy": 15.0,
+              "meetings_pb": 33,
+              "passes_bp": 1,
+              "meetings_bb": 24,
+              "passes_bb": 1
+            },
+            {
+              "time_s": 270.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 11.783333333333333,
+              "bike_occupancy": 14.133333333333333,
+              "meetings_pb": 25,
+              "passes_bp": 0,
+              "meetings_bb": 11,
+              "passes_bb": 0
+            }
+          ],
+          "incidence": {
+            "P.AB": {
+              "exposure_s": 2260.0,
+              "meetings": 196,
+              "passes": 3,
+              "meeting_rate": 312.21238938053096,
+              "passing_rate": 4.778761061946903,
+              "weighted_rate": 160.8849557522124
+            },
+            "P.BA": {
+              "exposure_s": 1761.5,
+              "meetings": 176,
+              "passes": 14,
+              "meeting_rate": 359.69344308827704,
+              "passing_rate": 28.611978427476583,
+              "weighted_rate": 208.4586999716151
+            },
+            "B.AB": {
+              "exposure_s": 2261.0,
+              "meetings": 366,
+              "passes": 4,
+              "meeting_rate": 9.712516585581602,
+              "passing_rate": 0.10614772224679346,
+              "weighted_rate": 10.773993808049536
+            },
+            "B.BA": {
+              "exposure_s": 1723.5,
+              "meetings": 386,
+              "passes": 19,
+              "meeting_rate": 13.437771975630984,
+              "passing_rate": 0.6614447345517842,
+              "weighted_rate": 20.052219321148826
+            }
+          },
+          "inputs": {
+            "task": "both",
+            "basis": "hourly",
+            "arrival": "random",
+            "centerline": "no",
+            "delay_source": "counts",
+            "length_m": 200.0,
+            "width_m": 3.048,
+            "phf": 0.85,
+            "ped_ab": 100.0,
+            "ped_ba": 100.0,
+            "bike_ab": 150.0,
+            "bike_ba": 150.0,
+            "count_ped_ab": 25,
+            "count_ped_ba": 25,
+            "count_bike_ab": 38,
+            "count_bike_ba": 38,
+            "ped_speed": 1.519936,
+            "bike_speed": 5.722112,
+            "ped_sd": 0.268224,
+            "bike_sd": 1.519936,
+            "attempts_ab": 100,
+            "attempts_ba": 100,
+            "delayed_ab": 20,
+            "delayed_ba": 20,
+            "probability_ab": "",
+            "probability_ba": "",
+            "duration_s": 300.0,
+            "warmup_s": 120.0,
+            "clearance_s": 600.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "506603b2133082414f30b006f742b6a434fecb597eb9cab5a39f34984b95da42",
+          "analytical": {
+            "inputs": {
+              "task": "both",
+              "basis": "hourly",
+              "arrival": "random",
+              "centerline": "no",
+              "delay_source": "counts",
+              "length_m": 200.0,
+              "width_m": 3.048,
+              "phf": 0.85,
+              "ped_ab": 100.0,
+              "ped_ba": 100.0,
+              "bike_ab": 150.0,
+              "bike_ba": 150.0,
+              "count_ped_ab": 25,
+              "count_ped_ba": 25,
+              "count_bike_ab": 38,
+              "count_bike_ba": 38,
+              "ped_speed": 1.519936,
+              "bike_speed": 5.722112,
+              "ped_sd": 0.268224,
+              "bike_sd": 1.519936,
+              "attempts_ab": 100,
+              "attempts_ba": 100,
+              "delayed_ab": 20,
+              "delayed_ba": 20,
+              "probability_ab": "",
+              "probability_ba": "",
+              "duration_s": 300.0,
+              "warmup_s": 120.0,
+              "clearance_s": 600.0,
+              "bin_s": 30.0,
+              "seed": 42
+            },
+            "signature": "506603b2133082414f30b006f742b6a434fecb597eb9cab5a39f34984b95da42",
+            "flows": {
+              "P.AB": 117.64705882352942,
+              "P.BA": 117.64705882352942,
+              "B.AB": 176.47058823529412,
+              "B.BA": 176.47058823529412
+            },
+            "directions": [
+              {
+                "direction": "AB",
+                "pedestrian": {
+                  "passing_h": 129.59558823529412,
+                  "meeting_h": 223.34558823529412,
+                  "weighted_h": 241.26838235294116,
+                  "los": "F"
+                },
+                "bicycle": {
+                  "active_min": 5.73479519426787,
+                  "meetings_min": 14.911110226724059,
+                  "weighted_min": 72.25906216940277,
+                  "probability_delay": 0.2,
+                  "delayed_min": 0.974915183025538,
+                  "delay_factor": 0.487457591512769,
+                  "score": 2.787966595536762,
+                  "raw_los": "D",
+                  "los": "D",
+                  "reason": ""
+                }
+              },
+              {
+                "direction": "BA",
+                "pedestrian": {
+                  "passing_h": 129.59558823529412,
+                  "meeting_h": 223.34558823529412,
+                  "weighted_h": 241.26838235294116,
+                  "los": "F"
+                },
+                "bicycle": {
+                  "active_min": 5.73479519426787,
+                  "meetings_min": 14.911110226724059,
+                  "weighted_min": 72.25906216940277,
+                  "probability_delay": 0.2,
+                  "delayed_min": 0.974915183025538,
+                  "delay_factor": 0.487457591512769,
+                  "score": 2.787966595536762,
+                  "raw_los": "D",
+                  "los": "D",
+                  "reason": ""
+                }
+              }
+            ],
+            "warnings": [
+              "BLOS condicionado a la probabilidad de demora introducida. Al cambiar ancho o demanda revise esa probabilidad."
+            ],
+            "assumptions": [
+              "HCM 7, capítulo 24: PLOS usa Fp = qb,s(1−Sp/Sb), Fm = qb,o(1+Sp/Sb) y F = Fp+0.5Fm; tasas de diseño ajustadas una sola vez por PHF o conteo de 15 min multiplicado por cuatro.",
+              "PLOS se evalúa para un peatón representativo por sentido. No se asigna PLOS de un sentido sin demanda peatonal; los eventos y el LOS no constituyen una medida de seguridad.",
+              "BLOS calcula reuniones y rebases activos con distribuciones normales de velocidad, integración trapezoidal en segmentos de hasta 0.01 mi y dos grupos: peatones y bicicletas. Corredores, patinadores y bicicletas infantiles se suponen ausentes.",
+              "La probabilidad de rebase demorado procede de intentos y demorados observados, o de un valor documentado por el analista. Sustituye la estimación de bloqueo de los pasos 4–5 del HCM. No se estima automáticamente con el ancho ni se toma de la microsimulación.",
+              "El BLOS se informa sólo con probabilidad de demora disponible y ancho entre 8 y 20 ft (2.4384–6.096 m), para sendero pavimentado sin separación por modo. Cambiar el ancho manteniendo la misma probabilidad produce una comparación condicional.",
+              "DPm = AT × PT × PHF conserva la corrección de calibración del HCM incluso con conteos de 15 min: en esa modalidad PHF sólo se requiere para DPm de BLOS.",
+              "SUMO usa bicicletas como vehículos, peatones striping y movimiento lateral por subcarriles. La sección se representa por dos mitades direccionales compartidas por ambos modos, con posibilidad de rebase por la mitad contraria según las reglas del motor.",
+              "La línea central interviene en la regresión BLOS; la simulación mantiene las dos mitades direccionales y no interpreta esa línea como una prohibición de rebase.",
+              "Encuentros y rebases simulados se detectan al cambiar el orden longitudinal de dos usuarios presentes en muestras consecutivas de 0.5 s. Se cuenta cada par una sola vez y se excluye el calentamiento; son eventos geométricos, no colisiones ni validación del LOS.",
+              "Las velocidades individuales deseadas son normales recortadas al rango 0.2–15 m/s; en modo Sólo PLOS se usan velocidades constantes. Estos perfiles de simulación no calibran la distribución analítica de velocidades ni representan un modelo ciclista validado.",
+              "Las estadísticas de viaje corresponden a la cohorte generada durante observación que completa antes del límite de despeje. Se informan pendientes y tamaño de muestra.",
+              "CROW se usa como marco cualitativo de convivencia y separación. No se asignan mínimos normativos ni se automatiza su metodología de diseño de redes."
+            ],
+            "created_at": "2026-10-26T06:07:44.527335+00:00"
+          },
+          "engine_version": "Eclipse SUMO sumo 1.28.0",
+          "created_at": "2026-10-26T06:07:45.232480+00:00",
+          "sample_s": 0.5,
+          "collisions": 0,
+          "model": "striping + sublane / IDM",
+          "warnings": [
+            "Los eventos simulados no sustituyen la probabilidad documentada usada en BLOS."
+          ]
+        }
+      },
+      {
+        "id": "36ae0cc233474674b367b3f5136d8096",
+        "name": "Sendero 4.572 m",
+        "inputs": {
+          "task": "both",
+          "basis": "hourly",
+          "arrival": "random",
+          "centerline": "no",
+          "delay_source": "counts",
+          "length_m": 200.0,
+          "width_m": 4.572,
+          "phf": 0.85,
+          "ped_ab": 100.0,
+          "ped_ba": 100.0,
+          "bike_ab": 150.0,
+          "bike_ba": 150.0,
+          "count_ped_ab": 25,
+          "count_ped_ba": 25,
+          "count_bike_ab": 38,
+          "count_bike_ba": 38,
+          "ped_speed": 1.519936,
+          "bike_speed": 5.722112,
+          "ped_sd": 0.268224,
+          "bike_sd": 1.519936,
+          "attempts_ab": 100,
+          "attempts_ba": 100,
+          "delayed_ab": 20,
+          "delayed_ba": 20,
+          "probability_ab": "",
+          "probability_ba": "",
+          "duration_s": 300.0,
+          "warmup_s": 120.0,
+          "clearance_s": 600.0,
+          "bin_s": 30.0,
+          "seed": 42
+        },
+        "origins": {
+          "task": "default",
+          "basis": "default",
+          "arrival": "default",
+          "centerline": "default",
+          "delay_source": "default",
+          "length_m": "default",
+          "width_m": "default",
+          "phf": "default",
+          "ped_ab": "default",
+          "ped_ba": "default",
+          "bike_ab": "default",
+          "bike_ba": "default",
+          "count_ped_ab": "default",
+          "count_ped_ba": "default",
+          "count_bike_ab": "default",
+          "count_bike_ba": "default",
+          "ped_speed": "default",
+          "bike_speed": "default",
+          "ped_sd": "default",
+          "bike_sd": "default",
+          "attempts_ab": "default",
+          "attempts_ba": "default",
+          "delayed_ab": "default",
+          "delayed_ba": "default",
+          "probability_ab": "default",
+          "probability_ba": "default",
+          "duration_s": "default",
+          "warmup_s": "default",
+          "clearance_s": "default",
+          "bin_s": "default",
+          "seed": "default"
+        },
+        "analytical": {
+          "inputs": {
+            "task": "both",
+            "basis": "hourly",
+            "arrival": "random",
+            "centerline": "no",
+            "delay_source": "counts",
+            "length_m": 200.0,
+            "width_m": 4.572,
+            "phf": 0.85,
+            "ped_ab": 100.0,
+            "ped_ba": 100.0,
+            "bike_ab": 150.0,
+            "bike_ba": 150.0,
+            "count_ped_ab": 25,
+            "count_ped_ba": 25,
+            "count_bike_ab": 38,
+            "count_bike_ba": 38,
+            "ped_speed": 1.519936,
+            "bike_speed": 5.722112,
+            "ped_sd": 0.268224,
+            "bike_sd": 1.519936,
+            "attempts_ab": 100,
+            "attempts_ba": 100,
+            "delayed_ab": 20,
+            "delayed_ba": 20,
+            "probability_ab": "",
+            "probability_ba": "",
+            "duration_s": 300.0,
+            "warmup_s": 120.0,
+            "clearance_s": 600.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "59e4767465a99b97c30d74b6c60945a49ab14223475214119c2eb9e2903c1869",
+          "flows": {
+            "P.AB": 117.64705882352942,
+            "P.BA": 117.64705882352942,
+            "B.AB": 176.47058823529412,
+            "B.BA": 176.47058823529412
+          },
+          "directions": [
+            {
+              "direction": "AB",
+              "pedestrian": {
+                "passing_h": 129.59558823529412,
+                "meeting_h": 223.34558823529412,
+                "weighted_h": 241.26838235294116,
+                "los": "F"
+              },
+              "bicycle": {
+                "active_min": 5.73479519426787,
+                "meetings_min": 14.911110226724059,
+                "weighted_min": 72.25906216940277,
+                "probability_delay": 0.2,
+                "delayed_min": 0.974915183025538,
+                "delay_factor": 0.487457591512769,
+                "score": 3.3166332622034287,
+                "raw_los": "C",
+                "los": "C",
+                "reason": ""
+              }
+            },
+            {
+              "direction": "BA",
+              "pedestrian": {
+                "passing_h": 129.59558823529412,
+                "meeting_h": 223.34558823529412,
+                "weighted_h": 241.26838235294116,
+                "los": "F"
+              },
+              "bicycle": {
+                "active_min": 5.73479519426787,
+                "meetings_min": 14.911110226724059,
+                "weighted_min": 72.25906216940277,
+                "probability_delay": 0.2,
+                "delayed_min": 0.974915183025538,
+                "delay_factor": 0.487457591512769,
+                "score": 3.3166332622034287,
+                "raw_los": "C",
+                "los": "C",
+                "reason": ""
+              }
+            }
+          ],
+          "warnings": [
+            "BLOS condicionado a la probabilidad de demora introducida. Al cambiar ancho o demanda revise esa probabilidad."
+          ],
+          "assumptions": [
+            "HCM 7, capítulo 24: PLOS usa Fp = qb,s(1−Sp/Sb), Fm = qb,o(1+Sp/Sb) y F = Fp+0.5Fm; tasas de diseño ajustadas una sola vez por PHF o conteo de 15 min multiplicado por cuatro.",
+            "PLOS se evalúa para un peatón representativo por sentido. No se asigna PLOS de un sentido sin demanda peatonal; los eventos y el LOS no constituyen una medida de seguridad.",
+            "BLOS calcula reuniones y rebases activos con distribuciones normales de velocidad, integración trapezoidal en segmentos de hasta 0.01 mi y dos grupos: peatones y bicicletas. Corredores, patinadores y bicicletas infantiles se suponen ausentes.",
+            "La probabilidad de rebase demorado procede de intentos y demorados observados, o de un valor documentado por el analista. Sustituye la estimación de bloqueo de los pasos 4–5 del HCM. No se estima automáticamente con el ancho ni se toma de la microsimulación.",
+            "El BLOS se informa sólo con probabilidad de demora disponible y ancho entre 8 y 20 ft (2.4384–6.096 m), para sendero pavimentado sin separación por modo. Cambiar el ancho manteniendo la misma probabilidad produce una comparación condicional.",
+            "DPm = AT × PT × PHF conserva la corrección de calibración del HCM incluso con conteos de 15 min: en esa modalidad PHF sólo se requiere para DPm de BLOS.",
+            "SUMO usa bicicletas como vehículos, peatones striping y movimiento lateral por subcarriles. La sección se representa por dos mitades direccionales compartidas por ambos modos, con posibilidad de rebase por la mitad contraria según las reglas del motor.",
+            "La línea central interviene en la regresión BLOS; la simulación mantiene las dos mitades direccionales y no interpreta esa línea como una prohibición de rebase.",
+            "Encuentros y rebases simulados se detectan al cambiar el orden longitudinal de dos usuarios presentes en muestras consecutivas de 0.5 s. Se cuenta cada par una sola vez y se excluye el calentamiento; son eventos geométricos, no colisiones ni validación del LOS.",
+            "Las velocidades individuales deseadas son normales recortadas al rango 0.2–15 m/s; en modo Sólo PLOS se usan velocidades constantes. Estos perfiles de simulación no calibran la distribución analítica de velocidades ni representan un modelo ciclista validado.",
+            "Las estadísticas de viaje corresponden a la cohorte generada durante observación que completa antes del límite de despeje. Se informan pendientes y tamaño de muestra.",
+            "CROW se usa como marco cualitativo de convivencia y separación. No se asignan mínimos normativos ni se automatiza su metodología de diseño de redes."
+          ],
+          "created_at": "2026-10-26T06:07:45.235624+00:00"
+        },
+        "simulation": {
+          "summary": {
+            "generated": 86,
+            "started": 86,
+            "completed": 86,
+            "pending": 0,
+            "cohort_generated": 53,
+            "cohort_completed": 53,
+            "meetings_pb": 226,
+            "passes_bp": 128,
+            "meetings_bb": 47,
+            "passes_bb": 2,
+            "clearance_s": 191.5
+          },
+          "groups": {
+            "P.AB": {
+              "generated": 20,
+              "completed": 20,
+              "cohort_completed": 15,
+              "mean_trip_s": 144.2018918139634,
+              "p95_trip_s": 190.73610356347646,
+              "speed_mps": 1.3855574118109655,
+              "mean_loss_s": 16.016666666666666
+            },
+            "P.BA": {
+              "generated": 16,
+              "completed": 16,
+              "cohort_completed": 11,
+              "mean_trip_s": 166.51997266770823,
+              "p95_trip_s": 212.77338503112216,
+              "speed_mps": 1.1998560701105945,
+              "mean_loss_s": 17.64909090909091
+            },
+            "B.AB": {
+              "generated": 25,
+              "completed": 25,
+              "cohort_completed": 15,
+              "mean_trip_s": 43.637220143190234,
+              "p95_trip_s": 61.318259339348124,
+              "speed_mps": 4.544285803479292,
+              "mean_loss_s": 4.056666666666667
+            },
+            "B.BA": {
+              "generated": 25,
+              "completed": 25,
+              "cohort_completed": 12,
+              "mean_trip_s": 38.66983248783146,
+              "p95_trip_s": 52.914608069131624,
+              "speed_mps": 5.128028420148979,
+              "mean_loss_s": 5.584166666666667
+            }
+          },
+          "series": [
+            {
+              "time_s": 0.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 10.033333333333333,
+              "bike_occupancy": 3.6666666666666665,
+              "meetings_pb": 19,
+              "passes_bp": 7,
+              "meetings_bb": 3,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 30.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 11.4,
+              "bike_occupancy": 2.2,
+              "meetings_pb": 13,
+              "passes_bp": 7,
+              "meetings_bb": 0,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 60.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 13.416666666666666,
+              "bike_occupancy": 1.9166666666666667,
+              "meetings_pb": 10,
+              "passes_bp": 6,
+              "meetings_bb": 1,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 90.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 15.016666666666667,
+              "bike_occupancy": 4.083333333333333,
+              "meetings_pb": 21,
+              "passes_bp": 18,
+              "meetings_bb": 6,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 120.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 14.05,
+              "bike_occupancy": 5.5,
+              "meetings_pb": 41,
+              "passes_bp": 18,
+              "meetings_bb": 11,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 150.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 14.516666666666667,
+              "bike_occupancy": 5.066666666666666,
+              "meetings_pb": 33,
+              "passes_bp": 27,
+              "meetings_bb": 7,
+              "passes_bb": 1
+            },
+            {
+              "time_s": 180.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 17.3,
+              "bike_occupancy": 2.15,
+              "meetings_pb": 24,
+              "passes_bp": 10,
+              "meetings_bb": 2,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 210.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 14.383333333333333,
+              "bike_occupancy": 7.383333333333334,
+              "meetings_pb": 48,
+              "passes_bp": 21,
+              "meetings_bb": 14,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 240.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 12.283333333333333,
+              "bike_occupancy": 2.5,
+              "meetings_pb": 15,
+              "passes_bp": 10,
+              "meetings_bb": 3,
+              "passes_bb": 0
+            },
+            {
+              "time_s": 270.0,
+              "interval_s": 30.0,
+              "ped_occupancy": 11.85,
+              "bike_occupancy": 1.4666666666666666,
+              "meetings_pb": 2,
+              "passes_bp": 4,
+              "meetings_bb": 0,
+              "passes_bb": 1
+            }
+          ],
+          "incidence": {
+            "P.AB": {
+              "exposure_s": 2269.5,
+              "meetings": 126,
+              "passes": 76,
+              "meeting_rate": 199.86781229345672,
+              "passing_rate": 120.55518836748182,
+              "weighted_rate": 220.4890945142102
+            },
+            "P.BA": {
+              "exposure_s": 1758.0,
+              "meetings": 100,
+              "passes": 52,
+              "meeting_rate": 204.77815699658703,
+              "passing_rate": 106.48464163822526,
+              "weighted_rate": 208.87372013651878
+            },
+            "B.AB": {
+              "exposure_s": 572.0,
+              "meetings": 147,
+              "passes": 78,
+              "meeting_rate": 15.41958041958042,
+              "passing_rate": 8.181818181818182,
+              "weighted_rate": 97.23776223776224
+            },
+            "B.BA": {
+              "exposure_s": 506.0,
+              "meetings": 173,
+              "passes": 52,
+              "meeting_rate": 20.513833992094863,
+              "passing_rate": 6.16600790513834,
+              "weighted_rate": 82.17391304347827
+            }
+          },
+          "inputs": {
+            "task": "both",
+            "basis": "hourly",
+            "arrival": "random",
+            "centerline": "no",
+            "delay_source": "counts",
+            "length_m": 200.0,
+            "width_m": 4.572,
+            "phf": 0.85,
+            "ped_ab": 100.0,
+            "ped_ba": 100.0,
+            "bike_ab": 150.0,
+            "bike_ba": 150.0,
+            "count_ped_ab": 25,
+            "count_ped_ba": 25,
+            "count_bike_ab": 38,
+            "count_bike_ba": 38,
+            "ped_speed": 1.519936,
+            "bike_speed": 5.722112,
+            "ped_sd": 0.268224,
+            "bike_sd": 1.519936,
+            "attempts_ab": 100,
+            "attempts_ba": 100,
+            "delayed_ab": 20,
+            "delayed_ba": 20,
+            "probability_ab": "",
+            "probability_ba": "",
+            "duration_s": 300.0,
+            "warmup_s": 120.0,
+            "clearance_s": 600.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "59e4767465a99b97c30d74b6c60945a49ab14223475214119c2eb9e2903c1869",
+          "analytical": {
+            "inputs": {
+              "task": "both",
+              "basis": "hourly",
+              "arrival": "random",
+              "centerline": "no",
+              "delay_source": "counts",
+              "length_m": 200.0,
+              "width_m": 4.572,
+              "phf": 0.85,
+              "ped_ab": 100.0,
+              "ped_ba": 100.0,
+              "bike_ab": 150.0,
+              "bike_ba": 150.0,
+              "count_ped_ab": 25,
+              "count_ped_ba": 25,
+              "count_bike_ab": 38,
+              "count_bike_ba": 38,
+              "ped_speed": 1.519936,
+              "bike_speed": 5.722112,
+              "ped_sd": 0.268224,
+              "bike_sd": 1.519936,
+              "attempts_ab": 100,
+              "attempts_ba": 100,
+              "delayed_ab": 20,
+              "delayed_ba": 20,
+              "probability_ab": "",
+              "probability_ba": "",
+              "duration_s": 300.0,
+              "warmup_s": 120.0,
+              "clearance_s": 600.0,
+              "bin_s": 30.0,
+              "seed": 42
+            },
+            "signature": "59e4767465a99b97c30d74b6c60945a49ab14223475214119c2eb9e2903c1869",
+            "flows": {
+              "P.AB": 117.64705882352942,
+              "P.BA": 117.64705882352942,
+              "B.AB": 176.47058823529412,
+              "B.BA": 176.47058823529412
+            },
+            "directions": [
+              {
+                "direction": "AB",
+                "pedestrian": {
+                  "passing_h": 129.59558823529412,
+                  "meeting_h": 223.34558823529412,
+                  "weighted_h": 241.26838235294116,
+                  "los": "F"
+                },
+                "bicycle": {
+                  "active_min": 5.73479519426787,
+                  "meetings_min": 14.911110226724059,
+                  "weighted_min": 72.25906216940277,
+                  "probability_delay": 0.2,
+                  "delayed_min": 0.974915183025538,
+                  "delay_factor": 0.487457591512769,
+                  "score": 3.3166332622034287,
+                  "raw_los": "C",
+                  "los": "C",
+                  "reason": ""
+                }
+              },
+              {
+                "direction": "BA",
+                "pedestrian": {
+                  "passing_h": 129.59558823529412,
+                  "meeting_h": 223.34558823529412,
+                  "weighted_h": 241.26838235294116,
+                  "los": "F"
+                },
+                "bicycle": {
+                  "active_min": 5.73479519426787,
+                  "meetings_min": 14.911110226724059,
+                  "weighted_min": 72.25906216940277,
+                  "probability_delay": 0.2,
+                  "delayed_min": 0.974915183025538,
+                  "delay_factor": 0.487457591512769,
+                  "score": 3.3166332622034287,
+                  "raw_los": "C",
+                  "los": "C",
+                  "reason": ""
+                }
+              }
+            ],
+            "warnings": [
+              "BLOS condicionado a la probabilidad de demora introducida. Al cambiar ancho o demanda revise esa probabilidad."
+            ],
+            "assumptions": [
+              "HCM 7, capítulo 24: PLOS usa Fp = qb,s(1−Sp/Sb), Fm = qb,o(1+Sp/Sb) y F = Fp+0.5Fm; tasas de diseño ajustadas una sola vez por PHF o conteo de 15 min multiplicado por cuatro.",
+              "PLOS se evalúa para un peatón representativo por sentido. No se asigna PLOS de un sentido sin demanda peatonal; los eventos y el LOS no constituyen una medida de seguridad.",
+              "BLOS calcula reuniones y rebases activos con distribuciones normales de velocidad, integración trapezoidal en segmentos de hasta 0.01 mi y dos grupos: peatones y bicicletas. Corredores, patinadores y bicicletas infantiles se suponen ausentes.",
+              "La probabilidad de rebase demorado procede de intentos y demorados observados, o de un valor documentado por el analista. Sustituye la estimación de bloqueo de los pasos 4–5 del HCM. No se estima automáticamente con el ancho ni se toma de la microsimulación.",
+              "El BLOS se informa sólo con probabilidad de demora disponible y ancho entre 8 y 20 ft (2.4384–6.096 m), para sendero pavimentado sin separación por modo. Cambiar el ancho manteniendo la misma probabilidad produce una comparación condicional.",
+              "DPm = AT × PT × PHF conserva la corrección de calibración del HCM incluso con conteos de 15 min: en esa modalidad PHF sólo se requiere para DPm de BLOS.",
+              "SUMO usa bicicletas como vehículos, peatones striping y movimiento lateral por subcarriles. La sección se representa por dos mitades direccionales compartidas por ambos modos, con posibilidad de rebase por la mitad contraria según las reglas del motor.",
+              "La línea central interviene en la regresión BLOS; la simulación mantiene las dos mitades direccionales y no interpreta esa línea como una prohibición de rebase.",
+              "Encuentros y rebases simulados se detectan al cambiar el orden longitudinal de dos usuarios presentes en muestras consecutivas de 0.5 s. Se cuenta cada par una sola vez y se excluye el calentamiento; son eventos geométricos, no colisiones ni validación del LOS.",
+              "Las velocidades individuales deseadas son normales recortadas al rango 0.2–15 m/s; en modo Sólo PLOS se usan velocidades constantes. Estos perfiles de simulación no calibran la distribución analítica de velocidades ni representan un modelo ciclista validado.",
+              "Las estadísticas de viaje corresponden a la cohorte generada durante observación que completa antes del límite de despeje. Se informan pendientes y tamaño de muestra.",
+              "CROW se usa como marco cualitativo de convivencia y separación. No se asignan mínimos normativos ni se automatiza su metodología de diseño de redes."
+            ],
+            "created_at": "2026-10-26T06:07:45.235624+00:00"
+          },
+          "engine_version": "Eclipse SUMO sumo 1.28.0",
+          "created_at": "2026-10-26T06:07:45.816094+00:00",
+          "sample_s": 0.5,
+          "collisions": 0,
+          "model": "striping + sublane / IDM",
+          "warnings": [
+            "Los eventos simulados no sustituyen la probabilidad documentada usada en BLOS."
+          ]
+        }
+      }
+    ],
+    "selected_id": "5bad17c364ac4aa8aa66082367407731"
+  }
+}

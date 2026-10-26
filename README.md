@@ -4,7 +4,24 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
-## Versión 3.2.0 — Fase 3: Plaza y flujos cruzados
+## Versión 3.3.0 — Fase 5: Senderos compartidos
+
+Nueva pestaña **Sendero compartido**: PLOS y BLOS por sentido, flujos o conteos de
+15 min, PHF, línea central, perfiles de velocidad y bicicletas/peatones dentro de
+una ejecución SUMO mixta. Incluye encuentros y rebases geométricos observados,
+exposición por grupo, cohortes, tiempos, comparación, CSV, gráficas y reporte LaTeX.
+
+**BLOS es condicionado:** requiere probabilidad de demora documentada, calculada de
+intentos/demorados observados o introducida con sustento. No implementa la estimación
+automática completa de bloqueo por carriles. Sin ese dato conserva los demás cálculos
+y muestra BLOS N/A. [Guía, ecuaciones y límites](docs/SHARED_PATH.md).
+
+Abra [la comparación de senderos](examples/Sendero_Compartido_Comparacion.wksim) o use
+las plantillas `examples/csv/sendero_*.csv`. El proyecto esquema 6 lee versiones
+anteriores y conserva respaldo al convertir un archivo 3.2. La Fase 4 de ampliación
+de escaleras queda pendiente por decisión del proyecto.
+
+### Fase 3: Plaza y flujos cruzados, desde 3.2
 
 Nueva pestaña **Plaza y flujos cruzados** con plaza/vestíbulo rectangular, cruce +
 y cruce T, de dos a cuatro accesos. Matriz OD local en peat/h, captura manual,
@@ -53,8 +70,7 @@ entradas pertinentes y distingue demanda horaria con PHF de conteos directos.
 - Exporte comparación y series CSV, gráficas PNG/PDF y reporte técnico LaTeX.
 - Guarde escenarios y resultados en `.wksim`; se admiten archivos de las versiones 2.1 y 3.0.
 
-Las siguientes fases contemplan escaleras, senderos compartidos y ampliaciones
-de intersecciones. Los análisis anteriores
+Quedan pendientes la ampliación de escaleras y la fase de cruces e intersecciones. Los análisis anteriores
 siguen disponibles en **Complementarios** y en **Corredor libre**.
 
 [Guía completa de Walkway 3, método y límites](docs/WALKWAY3.md).

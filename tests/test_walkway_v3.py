@@ -98,7 +98,7 @@ def test_csv_template_for_each_task_and_provenance(tmp_path, mode):
     assert evaluate_walkway(cases[0]["inputs"])["metrics"]
 
 
-def test_v2_migration_preserves_original_and_writes_schema5(tmp_path):
+def test_v2_migration_preserves_original_and_writes_schema6(tmp_path):
     old = ProjectState().to_dict()
     old["schema_version"] = 1
     old["software_version"] = "2.1.0"
@@ -115,7 +115,7 @@ def test_v2_migration_preserves_original_and_writes_schema5(tmp_path):
     state.walkway = dict(cases=[case], selected_id=case["id"], chart="speed")
     save_project(state, path)
     assert (tmp_path / "old.v2-backup.wksim").read_bytes() == previous
-    assert json.loads(path.read_text())["schema_version"] == 5
+    assert json.loads(path.read_text())["schema_version"] == 6
     loaded = load_project(path)
     assert loaded.walkway["cases"][0]["inputs"]["speed_mps"] == "borrador incompleto"
     assert loaded.walkway["cases"][0]["analytical"]["metrics"]

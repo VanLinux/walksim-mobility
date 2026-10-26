@@ -345,3 +345,39 @@ def test_plaza_matrix_modes_partial_drafts_and_alternatives(window, tmp_path, mo
     assert p.splitter.orientation() == Qt.Orientation.Vertical
     outer = widget.tabs.widget(7)
     assert p.minimumSizeHint().width() <= outer.viewport().width()
+
+
+def test_shared_modes_probability_drafts_and_small_screen(window, tmp_path, monkeypatch):
+    from walksim.domain.shared import fresh
+
+    w, app = window
+    p = w.shared_widget
+    w.tabs.setCurrentIndex(8)
+    assert p.calculate()
+    assert p.cards["blos_ab"].text() == "N/A"
+    p.fields["attempts_ab"].setText("100")
+    p._edited("attempts_ab")
+    p.fields["delayed_ab"].setText("20")
+    p._edited("delayed_ab")
+    assert p.calculate() and p.cards["blos_ab"].text() in "ABCDEF"
+    p.fields["task"].setCurrentIndex(p.fields["task"].findData("ped"))
+    p.fields["basis"].setCurrentIndex(p.fields["basis"].findData("count"))
+    assert not p.fields["phf"].isVisible() and not p.delay_box.isVisible()
+    assert p.fields["count_bike_ab"].isVisible()
+    assert p.calculate()
+    monkeypatch.setattr(
+        "walksim.ui.shared_widget.QInputDialog.getText", lambda *_a, **_k: ("Alternativa", True)
+    )
+    p.duplicate_case()
+    p.fields["ped_speed"].setText("")
+    p._edited("ped_speed")
+    assert not fresh(p.current, "analytical")
+    path = w.save_to_path(tmp_path / "shared_draft.wksim")
+    w.load_from_path(path)
+    assert p.fields["ped_speed"].text() == "" and len(p.cases) == 2
+    w.set_theme("dark")
+    w.resize(480, 360)
+    app.processEvents()
+    assert p.dark and p.more_button.isVisible()
+    assert p.splitter.orientation() == Qt.Orientation.Vertical
+    assert p.minimumSizeHint().width() <= w.tabs.widget(8).viewport().width()

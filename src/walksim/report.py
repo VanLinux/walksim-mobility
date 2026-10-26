@@ -81,10 +81,12 @@ def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> s
         and not any(c.get("analytical") for c in state.walkway.get("cases", []))
         and not any(c.get("analytical") for c in state.access.get("cases", []))
         and not any(c.get("analytical") for c in state.plaza.get("cases", []))
+        and not any(c.get("analytical") for c in state.shared.get("cases", []))
     ):
         raise ValueError("Realice al menos un análisis o una simulación antes de exportar.")
     from walksim.domain.access import fresh as access_fresh
     from walksim.domain.plaza import fresh as plaza_fresh
+    from walksim.domain.shared import fresh as shared_fresh
     from walksim.walkway_report import current_result
 
     included_analyses = len(state.analyses)
@@ -93,6 +95,7 @@ def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> s
         (state.walkway, current_result),
         (state.access, access_fresh),
         (state.plaza, plaza_fresh),
+        (state.shared, shared_fresh),
     ):
         included_analyses += sum(bool(predicate(c, "analytical")) for c in study.get("cases", []))
         included_simulations += sum(
@@ -179,6 +182,9 @@ Los valores no sustituyen una evaluación de seguridad vial, accesibilidad o eva
     from walksim.plaza_report import sections as plaza_sections
 
     parts.append(plaza_sections(with_results(state.plaza), assets))
+    from walksim.shared_report import sections as shared_sections
+
+    parts.append(shared_sections(with_results(state.shared), assets))
     if state.analyses:
         parts.append("\\section{Análisis analíticos realizados}\n")
     for index, result in enumerate(state.analyses, 1):
@@ -376,4 +382,20 @@ def write_report(state: ProjectState, path: str) -> None:
             figure.savefig(folder / name, format="pdf", bbox_inches="tight")
             figure.clear()
             assets["plaza:" + case["id"] + ":" + view] = (Path(folder.name) / name).as_posix()
+    from walksim.analysis.shared_figures import report_plot as shared_plot
+    from walksim.domain.shared import fresh as shared_fresh
+
+    for case in state.shared.get("cases", []):
+        if not shared_fresh(case, "simulation"):
+            continue
+        import hashlib
+
+        folder = target.parent / (target.stem + "_figuras")
+        folder.mkdir(exist_ok=True)
+        name = "shared_" + hashlib.sha256(case["id"].encode()).hexdigest()[:16] + ".pdf"
+        figure = shared_plot(case["simulation"])
+        FigureCanvasAgg(figure)
+        figure.savefig(folder / name, format="pdf", bbox_inches="tight")
+        figure.clear()
+        assets["shared:" + case["id"]] = (Path(folder.name) / name).as_posix()
     atomic_write(target, build_report(state, assets))

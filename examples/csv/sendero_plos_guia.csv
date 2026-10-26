@@ -1,0 +1,2 @@
+﻿name,task,basis,arrival,length_m,width_m,ped_speed,bike_speed,duration_s,warmup_s,clearance_s,bin_s,seed,ped_ab,ped_ba,bike_ab,bike_ba,phf
+Base · sendero,ped,hourly,random,200.0,3.048,1.519936,5.722112,600.0,120.0,600.0,30.0,42,100.0,100.0,150.0,150.0,0.85

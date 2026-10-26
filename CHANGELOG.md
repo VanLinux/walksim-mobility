@@ -1,5 +1,20 @@
 # Historial de cambios
 
+## 3.3.0 — 25 de octubre de 2026 · Fase 5: Senderos compartidos
+
+- Nuevo módulo con PLOS y BLOS por sentido, selección de análisis y demanda horaria o conteos de 15 min.
+- PLOS HCM 7 por encuentros/rebases ponderados; BLOS por eventos, ancho, línea central y demora documentada.
+- Probabilidad calculada de intentos y demorados de campo, o valor sustentado; BLOS N/A cuando falta ese dato.
+- BLOS condicionado: no se automatiza el modelo completo de bloqueo por carriles del HCM.
+- Integración normal de velocidades, factor DP, corrección PHF y ajustes por bajo volumen trazables.
+- Bicicletas-vehículo y peatones en ejecución SUMO con IDM, striping y subcarriles, sin teletransporte vehicular.
+- Eventos geométricos FCD de 0.5 s, exposición por modo/sentido, cohortes, tiempos, P95 y pendientes.
+- Alternativas, plantillas e importación CSV, exportes de grupos/series/comparación y gráficas PNG/PDF.
+- Formato .wksim esquema 6; lectura anterior y respaldo automático al convertir archivos 3.2.
+- Reporte técnico con analista, datos, método, restricciones, resultados y gráficas.
+- Ejemplo sintético de dos anchos, ambos simulados; guía SHARED_PATH.md.
+- La Fase 4 de ampliación de escaleras permanece pendiente por solicitud del usuario.
+
 ## 3.2.0 — 25 de octubre de 2026 · Fase 3: Plaza y flujos cruzados
 
 - Plantillas de plaza/vestíbulo rectangular, cruce + y T, con 2–4 accesos.

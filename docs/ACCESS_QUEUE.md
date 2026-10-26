@@ -156,3 +156,6 @@ encuentran en `examples/csv/access_*.csv`.
 
 Las capacidades de escaleras y dispositivos requieren fuentes o mediciones propias
  del estudio; los valores iniciales no proceden de estas referencias.
+
+Desde WalkSim 3.3 los proyectos nuevos usan esquema 6 para incluir Senderos compartidos;
+se mantiene la lectura de los esquemas de esta guía.
