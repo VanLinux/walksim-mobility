@@ -119,6 +119,9 @@ distintos: alguien puede haber pasado torniquetes y estar aún caminando a salid
 
 ## CSV, proyectos y reportes
 
+Desde WalkSim 3.2 se escribe esquema 5 para incluir Plaza; se siguen leyendo los
+proyectos anteriores de Accesos y colas en esquema 4, con respaldo al convertirlos.
+
 **Plantilla CSV** descarga columnas de la tarea seleccionada. Las opciones de texto
 son códigos (`access`, `metro_entry`, `metro_exit`, `turnstile`, `free`, `uniform`,
 `random`, `intermittent`, `batch`, `constant`, `exponential`, `time`, `rate`). Las

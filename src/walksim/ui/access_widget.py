@@ -68,11 +68,22 @@ class AccessWorker(QThread):
 
 class AccessWidget(WalkwayWidget):
     fresh = staticmethod(fresh)
+    case_factory = staticmethod(new_case)
+    export_stem = "accesos"
+    title = "Accesos y colas"
+    eyebrow = "ACCESS & QUEUE  /  CAPACIDAD Y ESPERA"
+    subtitle = "Compare dispositivos, descargas y alternativas de una estación sencilla."
+    compare_label = "Calcular capacidades de todos los casos"
+    metrics = [
+        ("capacity", "CAPACIDAD DE SERVICIO"),
+        ("ratio", "DEMANDA / CAPACIDAD"),
+        ("wait", "ESPERA MEDIA"),
+        ("pending", "PENDIENTES"),
+    ]
 
     def __init__(self):
         QWidget.__init__(self)
-        self.export_stem = "accesos"
-        self.cases = [new_case()]
+        self.cases = [self.case_factory()]
         self.selected_id = self.cases[0]["id"]
         self._loading, self.dark, self.worker, self._last_plot = True, False, None, None
         self.fields, self.form_rows = {}, {}
@@ -80,12 +91,9 @@ class AccessWidget(WalkwayWidget):
         layout.setContentsMargins(0, 12, 0, 0)
         layout.setSpacing(12)
         for text, style in [
-            ("ACCESS & QUEUE  /  CAPACIDAD Y ESPERA", "eyebrow"),
-            ("Accesos y colas", "workTitle"),
-            (
-                "Compare dispositivos, descargas y alternativas de una estación sencilla.",
-                "pageSubtitle",
-            ),
+            (self.eyebrow, "eyebrow"),
+            (self.title, "workTitle"),
+            (self.subtitle, "pageSubtitle"),
         ]:
             label = QLabel(text)
             label.setObjectName(style)
@@ -227,15 +235,10 @@ class AccessWidget(WalkwayWidget):
         self.status.setObjectName("infoBanner")
         layout.addWidget(self.status)
         grid = QGridLayout()
+        self.metrics_grid = grid
+        self.metric_frames = []
         self.cards = {}
-        for i, (key, text) in enumerate(
-            [
-                ("capacity", "CAPACIDAD DE SERVICIO"),
-                ("ratio", "DEMANDA / CAPACIDAD"),
-                ("wait", "ESPERA MEDIA"),
-                ("pending", "PENDIENTES"),
-            ]
-        ):
+        for i, (key, text) in enumerate(self.metrics):
             frame = QFrame()
             frame.setObjectName("metricCard")
             cl = QVBoxLayout(frame)
@@ -248,6 +251,7 @@ class AccessWidget(WalkwayWidget):
             cl.addWidget(value)
             grid.addWidget(frame, i // 2, i % 2)
             self.cards[key] = value
+            self.metric_frames.append(frame)
         layout.addLayout(grid)
         self.output_tabs = QTabWidget()
         self.output_tabs.setUsesScrollButtons(True)
@@ -260,7 +264,7 @@ class AccessWidget(WalkwayWidget):
         self.comparison_note.setWordWrap(True)
         cl.addWidget(self.comparison_note)
         for text, handler in [
-            ("Calcular capacidades de todos los casos", self.compare_all),
+            (self.compare_label, self.compare_all),
             ("Exportar comparación CSV", self.export_comparison),
         ]:
             b = QPushButton(text)
@@ -384,7 +388,7 @@ class AccessWidget(WalkwayWidget):
         self.status.setText(
             "Simulación sin completar. Puede corregir los datos y volver a ejecutar."
         )
-        QMessageBox.warning(self, "Accesos y colas", detail)
+        QMessageBox.warning(self, self.title, detail)
 
     def render(self):
         c = self.current
@@ -522,3 +526,10 @@ class AccessWidget(WalkwayWidget):
                 template(path, self.current["inputs"])
             except (ValueError, OSError) as exc:
                 QMessageBox.warning(self, "Plantilla", str(exc))
+
+    def adapt(self, width):
+        super().adapt(width)
+        columns = 1 if width < 650 else 2
+        for i, frame in enumerate(self.metric_frames):
+            self.metrics_grid.removeWidget(frame)
+            self.metrics_grid.addWidget(frame, i // columns, i % columns)

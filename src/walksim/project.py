@@ -14,6 +14,7 @@ from walksim import __version__
 from walksim.domain.access import validate_study as validate_access_study
 from walksim.domain.analysis import METHODS, calculate
 from walksim.domain.models import CorridorScenario, DirectionResult, ProjectInfo
+from walksim.domain.plaza import validate_study as validate_plaza_study
 from walksim.domain.walkway import validate_study
 
 MAX_FILE_BYTES = 8 * 1024 * 1024
@@ -30,11 +31,12 @@ class ProjectState:
     simulations: list[dict] = field(default_factory=list)
     walkway: dict = field(default_factory=dict)
     access: dict = field(default_factory=dict)
+    plaza: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "format": "WalkSim Mobility Project",
-            "schema_version": 4,
+            "schema_version": 5,
             "software_version": __version__,
             **asdict(self),
         }
@@ -77,7 +79,7 @@ def state_from_dict(data: Any) -> ProjectState:
     try:
         if not isinstance(data, dict) or data.get("format") != "WalkSim Mobility Project":
             raise ValueError("El archivo no es un proyecto WalkSim Mobility.")
-        if data.get("schema_version") not in (1, 3, 4):
+        if data.get("schema_version") not in (1, 3, 4, 5):
             raise ValueError("Versión de formato .wksim no compatible.")
         _finite_tree(data)
         project = ProjectInfo(**data["project"])
@@ -174,6 +176,7 @@ def state_from_dict(data: Any) -> ProjectState:
             simulations,
             walkway,
             validate_access_study(data.get("access", {})),
+            validate_plaza_study(data.get("plaza", {})),
         )
     except (KeyError, TypeError, AttributeError, OverflowError) as exc:
         raise ValueError("Estructura del archivo .wksim incompleta o incorrecta.") from exc
@@ -191,8 +194,10 @@ def save_project(state: ProjectState, path: str | Path) -> Path:
     if target.exists():
         try:
             old = json.loads(target.read_text(encoding="utf-8-sig"))
-            if isinstance(old, dict) and old.get("schema_version") in (1, 3):
-                suffix = ".v2-backup.wksim" if old["schema_version"] == 1 else ".v3.0-backup.wksim"
+            if isinstance(old, dict) and old.get("schema_version") in (1, 3, 4):
+                suffix = {1: ".v2-backup.wksim", 3: ".v3.0-backup.wksim", 4: ".v3.1-backup.wksim"}[
+                    old["schema_version"]
+                ]
                 backup = target.with_name(target.stem + suffix)
                 if not backup.exists():
                     atomic_write(backup, target.read_text(encoding="utf-8-sig"))

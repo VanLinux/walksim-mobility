@@ -185,8 +185,8 @@ El programa avisa si las alternativas cambian definición de demanda o periodos.
 - Editar entradas marca los resultados como desactualizados. Se conservan los
   resultados anteriores en el proyecto, pero no se muestran como resultados
   actuales ni se usan como tales en el reporte.
-- Desde 3.1, `.wksim` usa `schema_version: 4`, separado de `software_version: 3.1.0`.
-  Se admiten proyectos 2.1 (`schema_version: 1`), 3.0 (esquema 3) y 3.1 (esquema 4). Al sobrescribir un archivo
+- Desde 3.2, `.wksim` usa `schema_version: 5`, separado de `software_version: 3.2.0`.
+  Se admiten proyectos 2.1 (`schema_version: 1`), 3.0 (esquema 3) 3.1 (esquema 4) y 3.2 (esquema 5). Al sobrescribir un archivo
   con esquema 1 se conserva una copia `nombre.v2-backup.wksim`, sin reemplazar una
   copia previa. Se conservan los antiguos análisis y borradores.
 - El formato guarda escenarios, procedencia, resultados, series, estadísticas y

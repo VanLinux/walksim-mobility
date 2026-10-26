@@ -311,3 +311,37 @@ def test_access_worker_runs_without_blocking_file_and_close_guards(window, monke
     assert widget.save_action.isEnabled() and panel.current["simulation"] == result
     panel.current["simulation"] = None
     panel.render = original_render
+
+
+def test_plaza_matrix_modes_partial_drafts_and_alternatives(window, tmp_path, monkeypatch):
+    from walksim.domain.plaza import fresh
+
+    widget, app = window
+    p = widget.plaza_widget
+    widget.tabs.setCurrentIndex(7)
+    assert p.calculate()
+    assert p.cards["area"].text() == "432.0 m²"
+    p.matrix.item(0, 1).setText("850")
+    assert p.current["inputs"]["od"][0][1] == "850"
+    assert not fresh(p.current, "analytical")
+    monkeypatch.setattr(
+        "walksim.ui.plaza_widget.QInputDialog.getText", lambda *_a, **_k: ("Plaza amplia", True)
+    )
+    p.duplicate_case()
+    p.matrix.item(0, 1).setText("")
+    assert p.cases[0]["inputs"]["od"][0][1] == "850"
+    p.fields["template"].setCurrentIndex(p.fields["template"].findData("tee"))
+    assert not p.matrix.item(0, 1).flags() & Qt.ItemFlag.ItemIsEnabled
+    p.fields["template"].setCurrentIndex(p.fields["template"].findData("rectangle"))
+    assert p.matrix.item(0, 1).text() == ""
+    path = widget.save_to_path(tmp_path / "plaza_draft.wksim")
+    widget.load_from_path(path)
+    assert p.matrix.item(0, 1).text() == "" and len(p.cases) == 2
+    widget.set_theme("dark")
+    widget.resize(480, 360)
+    widget.tabs.setCurrentIndex(7)
+    app.processEvents()
+    assert p.dark and p.more_button.isVisible()
+    assert p.splitter.orientation() == Qt.Orientation.Vertical
+    outer = widget.tabs.widget(7)
+    assert p.minimumSizeHint().width() <= outer.viewport().width()

@@ -1,0 +1,13 @@
+﻿name,template,arrival,length_m,height_m,approach_m,speed_mps,cell_m,duration_s,warmup_s,clearance_s,bin_s,seed,accesses,width_n_m,width_s_m,width_e_m,width_w_m,origin,destination,rate_pph
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,N,S,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,N,E,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,N,W,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,S,N,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,S,E,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,S,W,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,E,N,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,E,S,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,E,W,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,W,N,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,W,S,200.0
+Base · plaza,rectangle,uniform,24.0,18.0,10.0,1.2,2.0,600.0,60.0,300.0,30.0,42,4,4.0,4.0,4.0,4.0,W,E,200.0

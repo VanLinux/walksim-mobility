@@ -4,7 +4,24 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
-## Versión 3.1.0 — Fase 2: Accesos y colas
+## Versión 3.2.0 — Fase 3: Plaza y flujos cruzados
+
+Nueva pestaña **Plaza y flujos cruzados** con plaza/vestíbulo rectangular, cruce +
+y cruce T, de dos a cuatro accesos. Matriz OD local en peat/h, captura manual,
+importación/exportación y guía CSV. Los peatones comparten una ejecución SUMO
+striping; se generan mapas de densidad media/máxima, ocupación acumulada y
+permanencia por celda, con resultados de viaje por OD y zonas críticas.
+
+Incluye alternativas, exportes CSV de OD/celdas/series, mapas PNG/PDF y reporte
+LaTeX con cuatro mapas por caso. El esquema .wksim 5 lee proyectos 2.1/3.0/3.1
+y conserva respaldo al convertir originales. Se mantienen los módulos anteriores.
+
+[Guía de Plaza y metodología](docs/PLAZA.md). Abra
+[el estudio de comparación de plazas](examples/Plaza_Comparacion.wksim) y revise
+las plantillas `examples/csv/plaza_*.csv`. Los mapas son derivados muestreados del
+motor; no representan un PLOS HCM ni una evaluación de seguridad.
+
+### Fase 2: Accesos y colas, desde 3.1
 
 Nueva pestaña **Accesos y colas** para puertas, torniquetes, filtros y acceso libre.
 Incluye llegadas uniformes, Poisson, intermitentes y descargas masivas, una plantilla
@@ -36,9 +53,8 @@ entradas pertinentes y distingue demanda horaria con PHF de conteos directos.
 - Exporte comparación y series CSV, gráficas PNG/PDF y reporte técnico LaTeX.
 - Guarde escenarios y resultados en `.wksim`; se admiten archivos de las versiones 2.1 y 3.0.
 
-La siguiente fase contempla plazas con OD local y mapas de calor; senderos
-compartidos y ampliaciones de
-intersecciones se desarrollarán en fases posteriores. Los análisis anteriores
+Las siguientes fases contemplan escaleras, senderos compartidos y ampliaciones
+de intersecciones. Los análisis anteriores
 siguen disponibles en **Complementarios** y en **Corredor libre**.
 
 [Guía completa de Walkway 3, método y límites](docs/WALKWAY3.md).

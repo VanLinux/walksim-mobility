@@ -1,5 +1,20 @@
 # Historial de cambios
 
+## 3.2.0 — 25 de octubre de 2026 · Fase 3: Plaza y flujos cruzados
+
+- Plantillas de plaza/vestíbulo rectangular, cruce + y T, con 2–4 accesos.
+- Matriz OD local editable en peat/h, sumas por origen y destino, guía y CSV completos.
+- Ejecución SUMO striping compartida, con walkingArea explícita y brazos en cruces.
+- Posiciones FCD por segundo, integración espacial y celdas recortadas por el polígono.
+- Cuatro mapas: densidad media/máxima, ocupación acumulada y permanencia por visitante.
+- Conteos, tiempos, P95, velocidad espacial y tiempo perdido por OD, con cohortes y pendientes.
+- Alternativas, zonas críticas, exportes de OD, celdas, series y mapas PNG/PDF.
+- Proyecto esquema 5; lee 1/3/4 y conserva respaldo al convertir un original 3.1.
+- Reporte LaTeX con matriz, ecuaciones, trazabilidad, resultados y cuatro mapas por caso.
+- Interfaz en claro/oscuro adaptable, acciones de simulación explícitas y guía integrada.
+- Estudio sintético de comparación de plazas ejecutado y plantillas por geometría.
+- Límites de cálculo documentados; sin índices de seguridad ni PLOS de plaza inferidos.
+
 ## 3.1.0 — 26 de octubre de 2026 · Fase 2: Accesos y colas
 
 - Nueva pestaña adaptable en claro/oscuro: accesos individuales y Metro entrada/descarga.
