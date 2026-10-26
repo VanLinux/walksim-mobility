@@ -1,0 +1,2 @@
+﻿name,layout,device,arrival,approach_m,exit_m,width_m,speed_mps,duration_s,warmup_s,clearance_s,bin_s,seed,service,service_basis,devices,service_s,waiting_length_m,waiting_width_m,rate_pph
+Base · acceso,access,turnstile,uniform,15.0,15.0,3.0,1.2,600.0,60.0,600.0,30.0,42,constant,time,2,2.0,10.0,5.0,2400.0

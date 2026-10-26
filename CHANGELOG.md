@@ -1,5 +1,21 @@
 # Historial de cambios
 
+## 3.1.0 — 26 de octubre de 2026 · Fase 2: Accesos y colas
+
+- Nueva pestaña adaptable en claro/oscuro: accesos individuales y Metro entrada/descarga.
+- Puertas, torniquetes, filtros y acceso libre; datos activos según tarea.
+- Servicio por tasa o tiempo medio, constante o exponencial, con varios dispositivos FCFS.
+- Llegadas uniformes, Poisson, intermitentes y descargas masivas reproducibles.
+- Recorridos SUMO enlazados por atención de eventos; escaleras por capacidad equivalente.
+- Colas, acumulación, densidad global de área, utilización, esperas, P95, despeje y censura.
+- Capacidad nominal, reserva entre descargas y referencia Erlang C sólo cuando aplica.
+- Alternativas, CSV por tarea, gráficas PNG/PDF, comparación y series exportables.
+- Esquema .wksim 4, lectura 1/3, borradores y snapshots; respaldo al convertir originales.
+- Reporte LaTeX ampliado con entradas, procedencia, ecuaciones, motor, límites y figuras.
+- Ejemplo Metro ejecutado de dos y cuatro torniquetes y guía ACCESS_QUEUE.md.
+- Aclarados los nombres de las acciones que ejecutan datos del usuario.
+- El modelo de cola es equivalente y no impone bloqueo espacial; no representa peldaños.
+
 ## 3.0.0 — 25 de octubre de 2026 · Walkway, primera entrega
 
 - Nuevo espacio de trabajo Walkway, con modos operacional, diseño de ancho y

@@ -22,7 +22,7 @@ son fases posteriores: no se presentan como implementados.
    conserva los datos, pero debe calcularse y simularse por separado.
 6. En **Comparar**, calcule todas las alternativas y exporte la tabla a CSV.
 7. Despliegue **Opciones de microsimulación** y pulse **Ejecutar microsimulación**
-   (también Simulación → Ejecutar escenario Walkway, F5).
+   (también Simulación → Simular mis datos · Walkway, F5).
 8. Revise la comparación, gráficas y procedencia de datos. Puede exportar las
    gráficas a PNG/PDF y las series a CSV.
 9. En **Archivo**, guarde `.wksim` o exporte el informe `.tex` con el analista.
@@ -185,8 +185,8 @@ El programa avisa si las alternativas cambian definición de demanda o periodos.
 - Editar entradas marca los resultados como desactualizados. Se conservan los
   resultados anteriores en el proyecto, pero no se muestran como resultados
   actuales ni se usan como tales en el reporte.
-- `.wksim` usa `schema_version: 3`, separado de `software_version: 3.0.0`.
-  Se admiten proyectos 2.1 (`schema_version: 1`) y 3. Al sobrescribir un archivo
+- Desde 3.1, `.wksim` usa `schema_version: 4`, separado de `software_version: 3.1.0`.
+  Se admiten proyectos 2.1 (`schema_version: 1`), 3.0 (esquema 3) y 3.1 (esquema 4). Al sobrescribir un archivo
   con esquema 1 se conserva una copia `nombre.v2-backup.wksim`, sin reemplazar una
   copia previa. Se conservan los antiguos análisis y borradores.
 - El formato guarda escenarios, procedencia, resultados, series, estadísticas y

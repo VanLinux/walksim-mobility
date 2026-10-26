@@ -79,8 +79,19 @@ def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> s
         not state.analyses
         and not state.simulations
         and not any(c.get("analytical") for c in state.walkway.get("cases", []))
+        and not any(c.get("analytical") for c in state.access.get("cases", []))
     ):
         raise ValueError("Realice al menos un análisis o una simulación antes de exportar.")
+    from walksim.domain.access import fresh as access_fresh
+    from walksim.walkway_report import current_result
+
+    included_analyses = len(state.analyses)
+    included_simulations = len(state.simulations)
+    for study, predicate in ((state.walkway, current_result), (state.access, access_fresh)):
+        included_analyses += sum(bool(predicate(c, "analytical")) for c in study.get("cases", []))
+        included_simulations += sum(
+            bool(predicate(c, "simulation")) for c in study.get("cases", [])
+        )
     stamp = datetime.now(ZoneInfo("America/Mexico_City")).strftime("%d/%m/%Y %H:%M")
     parts = [
         r"""\documentclass[11pt,letterpaper]{article}
@@ -110,8 +121,8 @@ def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> s
                 ("Proyecto", state.project.name),
                 ("Ubicación", state.project.location),
                 ("Analista responsable", state.project.analyst),
-                ("Análisis analíticos incluidos", len(state.analyses)),
-                ("Microsimulaciones incluidas", len(state.simulations)),
+                ("Análisis analíticos incluidos", included_analyses),
+                ("Microsimulaciones incluidas", included_simulations),
             ]
         ),
         "\\textbf{Notas del analista:} " + tex_escape(state.project.notes or "Sin notas.") + "\n",
@@ -149,6 +160,9 @@ Los valores no sustituyen una evaluación de seguridad vial, accesibilidad o eva
     from walksim.walkway_report import sections
 
     parts.append(sections(state.walkway, assets))
+    from walksim.access_report import sections as access_sections
+
+    parts.append(access_sections(state.access, assets))
     if state.analyses:
         parts.append("\\section{Análisis analíticos realizados}\n")
     for index, result in enumerate(state.analyses, 1):
@@ -306,4 +320,20 @@ def write_report(state: ProjectState, path: str) -> None:
         figure.savefig(folder / name, format="pdf", bbox_inches="tight")
         figure.clear()
         assets[case["id"]] = (Path(folder.name) / name).as_posix()
+    from walksim.analysis.access_figures import report_plot as access_plot
+    from walksim.domain.access import fresh
+
+    for case in state.access.get("cases", []):
+        if not fresh(case, "simulation"):
+            continue
+        import hashlib
+
+        folder = target.parent / (target.stem + "_figuras")
+        folder.mkdir(exist_ok=True)
+        name = "access_" + hashlib.sha256(case["id"].encode()).hexdigest()[:16] + ".pdf"
+        figure = access_plot(case["simulation"])
+        FigureCanvasAgg(figure)
+        figure.savefig(folder / name, format="pdf", bbox_inches="tight")
+        figure.clear()
+        assets["access:" + case["id"]] = (Path(folder.name) / name).as_posix()
     atomic_write(target, build_report(state, assets))

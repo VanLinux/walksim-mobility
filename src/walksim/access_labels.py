@@ -1,0 +1,38 @@
+"""Etiquetas de resultados compartidas por interfaz e informe."""
+
+SUMMARY_LABELS = dict(
+    generated="Peatones generados (incluye calentamiento)",
+    completed="Recorridos completados",
+    pending="Pendientes al finalizar el despeje",
+    cohort_generated="Generados en periodo observado",
+    cohort_completed="Completados de la cohorte observada",
+    mean_wait_s="Espera media de cohorte (s)",
+    max_wait_s="Espera máxima de cohorte (s)",
+    p95_wait_s="P95 de espera de cohorte (s)",
+    mean_trip_s="Tiempo medio total de cohorte (s)",
+    mean_system="Acumulación media del sistema",
+    max_system="Acumulación máxima del sistema",
+    clearance_s="Despeje adicional realizado (s)",
+    pending_at_observation_end="Pendientes al terminar observación",
+)
+STAGE_LABELS = dict(
+    servers="Dispositivos",
+    mean_s="Servicio medio nominal (s)",
+    area_m2="Área equivalente (m²)",
+    arrived="Llegaron a la estación",
+    processed="Atendidos al límite de despeje",
+    pending="Pendientes de atención al límite de despeje",
+    mean_queue="Cola media observada (peat)",
+    max_queue="Cola máxima observada (peat)",
+    mean_accumulation="Acumulación media observada",
+    max_accumulation="Acumulación máxima observada",
+    density="Densidad media (peat/m²)",
+    max_density="Densidad máxima (peat/m²)",
+    utilization="Fracción de tiempo en servicio observada",
+    mean_wait_s="Espera media por estación (s)",
+    max_wait_s="Espera máxima por estación (s)",
+    p95_wait_s="P95 de espera por estación (s)",
+    wait_sample="Personas en muestra de espera",
+    wait_censored="Esperas censuradas",
+    pending_at_observation_end="Pendientes al terminar observación",
+)

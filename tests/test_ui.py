@@ -256,3 +256,58 @@ def test_walkway_controls_remain_accessible_at_small_size(window):
     outer.ensureWidgetVisible(panel.splitter)
     app.processEvents()
     assert outer.verticalScrollBar().maximum() > 0
+
+
+def test_access_dynamic_fields_drafts_theme_and_saved_results(window, tmp_path):
+    from walksim.domain.access import fresh
+
+    widget, app = window
+    panel = widget.access_widget
+    widget.tabs.setCurrentIndex(6)
+    assert panel.calculate()
+    assert panel.cards["capacity"].text() == "3,600 peat/h"
+    panel.fields["layout"].setCurrentIndex(panel.fields["layout"].findData("metro_exit"))
+    assert panel.fields["arrival"].currentData() == "batch"
+    assert panel.metro_box.isVisible()
+    assert not panel.fields["rate_pph"].isVisible()
+    panel.fields["passengers"].setText("120")
+    panel._edited("passengers")
+    assert panel.calculate()
+    panel.fields["service_s"].setText("")
+    panel._edited("service_s")
+    assert not fresh(panel.current, "analytical")
+    path = widget.save_to_path(tmp_path / "access.wksim")
+    widget.load_from_path(path)
+    assert panel.fields["service_s"].text() == ""
+    assert panel.current["analytical"] is not None
+    widget.set_theme("dark")
+    assert panel.dark
+    widget.resize(480, 360)
+    app.processEvents()
+    assert panel.splitter.orientation() == Qt.Orientation.Vertical
+    assert panel.more_button.isVisible()
+    outer = widget.tabs.widget(6)
+    assert panel.minimumSizeHint().width() <= outer.viewport().width()
+
+
+def test_access_worker_runs_without_blocking_file_and_close_guards(window, monkeypatch):
+    import time
+
+    from walksim.domain.access import evaluate_access
+
+    widget, app = window
+    panel = widget.access_widget
+    result = dict(signature=evaluate_access({})["signature"])
+    monkeypatch.setattr("walksim.ui.access_widget.run_access_simulation", lambda _raw: result)
+    # Keep this a thread/lifecycle check; rendering is covered by the actual result tests.
+    original_render = panel.render
+    panel.render = lambda: None
+    panel.simulate()
+    assert widget._busy and not widget.save_action.isEnabled()
+    deadline = time.monotonic() + 5
+    while widget._busy and time.monotonic() < deadline:
+        app.processEvents()
+    assert not widget._busy and panel.worker is None
+    assert widget.save_action.isEnabled() and panel.current["simulation"] == result
+    panel.current["simulation"] = None
+    panel.render = original_render

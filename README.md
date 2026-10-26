@@ -4,7 +4,23 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
-## Versión 3.0.0 — Walkway, primera entrega
+## Versión 3.1.0 — Fase 2: Accesos y colas
+
+Nueva pestaña **Accesos y colas** para puertas, torniquetes, filtros y acceso libre.
+Incluye llegadas uniformes, Poisson, intermitentes y descargas masivas, una plantilla
+Metro de entrada/salida, comparación de alternativas, colas, esperas, P95, densidad
+equivalente y pendientes. SUMO calcula los recorridos planos y un sistema FCFS por
+eventos controla el servicio con capacidad explícita. Las escaleras se representan
+por capacidad equivalente; no se modela aún su geometría vertical ni bloqueo por
+falta de espacio. Consulte [la guía completa y los límites](docs/ACCESS_QUEUE.md).
+
+Abra [la comparación de dos y cuatro torniquetes](examples/AccessQueue_Metro_Comparacion.wksim)
+o importe una plantilla `examples/csv/access_*.csv`. **Simular mis datos** ejecuta
+el caso seleccionado; **Simular ejemplo** añade un corredor de muestra independiente.
+Guarda proyectos 3.1 y lee los de 2.1/3.0, conservando copia al convertir el original.
+El reporte `.tex` incluye entradas, método, resultados y gráficas de ambos módulos.
+
+### Walkway, disponible desde 3.0
 
 La versión 3 estrena un espacio de trabajo de corredores con **operación, diseño de
 ancho, demanda admisible y comparación de escenarios**. El formulario muestra las
@@ -18,10 +34,10 @@ entradas pertinentes y distingue demanda horaria con PHF de conteos directos.
 - Compare estimaciones analíticas con mediciones y estadísticos por sentido.
 - Consulte acumulación, densidad, flujo, velocidad por intervalo y tiempos de viaje.
 - Exporte comparación y series CSV, gráficas PNG/PDF y reporte técnico LaTeX.
-- Guarde escenarios y resultados en `.wksim`; se admiten archivos de la versión 2.1.
+- Guarde escenarios y resultados en `.wksim`; se admiten archivos de las versiones 2.1 y 3.0.
 
-La entrega corresponde al núcleo **Walkway** acordado. Las plazas con OD local,
-mapas de calor, dispositivos de servicio, senderos compartidos y ampliaciones de
+La siguiente fase contempla plazas con OD local y mapas de calor; senderos
+compartidos y ampliaciones de
 intersecciones se desarrollarán en fases posteriores. Los análisis anteriores
 siguen disponibles en **Complementarios** y en **Corredor libre**.
 

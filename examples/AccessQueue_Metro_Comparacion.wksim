@@ -1,0 +1,1275 @@
+{
+  "format": "WalkSim Mobility Project",
+  "schema_version": 4,
+  "software_version": "3.1.0",
+  "project": {
+    "name": "Metro · alternativas de acceso",
+    "location": "Estación sintética",
+    "analyst": "Analista de ejemplo",
+    "notes": "Datos sintéticos para aprendizaje. Las capacidades son supuestos editables, no valores normativos."
+  },
+  "corridor": {
+    "length_m": 100.0,
+    "width_m": 2.5,
+    "flow_ab_pph": 600.0,
+    "flow_ba_pph": 400.0,
+    "walking_speed_mps": 1.34,
+    "analysis_time_s": 3600.0,
+    "seed": 42
+  },
+  "active_method": "walkway",
+  "drafts": {},
+  "draft_names": {},
+  "analyses": [],
+  "simulations": [],
+  "walkway": {},
+  "access": {
+    "cases": [
+      {
+        "id": "e002b88fea89444d8765a84bbfb391c0",
+        "name": "Descarga Metro · 2 torniquetes",
+        "inputs": {
+          "layout": "metro_exit",
+          "device": "turnstile",
+          "arrival": "batch",
+          "service": "constant",
+          "service_basis": "time",
+          "devices": 2,
+          "service_s": 2.0,
+          "service_pph": 1800,
+          "rate_pph": 2400,
+          "passengers": 300,
+          "cycle_s": 180.0,
+          "release_s": 30.0,
+          "approach_m": 15.0,
+          "transfer_m": 20.0,
+          "exit_m": 15.0,
+          "width_m": 3.0,
+          "speed_mps": 1.2,
+          "waiting_length_m": 20.0,
+          "waiting_width_m": 6.0,
+          "stairs": 2,
+          "stair_pph": 3600.0,
+          "platform_m2": 180.0,
+          "duration_s": 540.0,
+          "warmup_s": 0.0,
+          "clearance_s": 900.0,
+          "bin_s": 30.0,
+          "seed": 42
+        },
+        "origins": {
+          "layout": "default",
+          "device": "default",
+          "arrival": "default",
+          "service": "default",
+          "service_basis": "default",
+          "devices": "default",
+          "service_s": "default",
+          "service_pph": "default",
+          "rate_pph": "default",
+          "passengers": "default",
+          "cycle_s": "default",
+          "release_s": "default",
+          "approach_m": "default",
+          "transfer_m": "default",
+          "exit_m": "default",
+          "width_m": "default",
+          "speed_mps": "default",
+          "waiting_length_m": "default",
+          "waiting_width_m": "default",
+          "stairs": "default",
+          "stair_pph": "default",
+          "platform_m2": "default",
+          "duration_s": "default",
+          "warmup_s": "default",
+          "clearance_s": "default",
+          "bin_s": "default",
+          "seed": "default"
+        },
+        "analytical": {
+          "inputs": {
+            "layout": "metro_exit",
+            "device": "turnstile",
+            "arrival": "batch",
+            "service": "constant",
+            "service_basis": "time",
+            "devices": 2,
+            "service_s": 2.0,
+            "service_pph": 1800,
+            "rate_pph": 2400,
+            "passengers": 300,
+            "cycle_s": 180.0,
+            "release_s": 30.0,
+            "approach_m": 15.0,
+            "transfer_m": 20.0,
+            "exit_m": 15.0,
+            "width_m": 3.0,
+            "speed_mps": 1.2,
+            "waiting_length_m": 20.0,
+            "waiting_width_m": 6.0,
+            "stairs": 2,
+            "stair_pph": 3600.0,
+            "platform_m2": 180.0,
+            "duration_s": 540.0,
+            "warmup_s": 0.0,
+            "clearance_s": 900.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "49ce9644b7eead74c5f3033ccd089d73e5104329f9aee554ae2eb3454fa79891",
+          "metrics": {
+            "Demanda media nominal (peat/h)": 6000.0,
+            "Capacidad de servicio (peat/h)": 3600.0,
+            "Demanda / capacidad": 1.6666666666666667,
+            "Crecimiento nominal si sobrecarga (peat/min)": 40.0,
+            "Capacidad de servicio por intervalo (peat)": 180.0,
+            "Reserva nominal por intervalo (peat)": -120.0,
+            "Cota de atención de una descarga aislada (s)": 300.0
+          },
+          "stages": [
+            {
+              "key": "stairs",
+              "label": "Escaleras · capacidad equivalente",
+              "servers": 2,
+              "mean_s": 1.0,
+              "area_m2": 180.0
+            },
+            {
+              "key": "gate",
+              "label": "Torniquetes",
+              "servers": 2,
+              "mean_s": 2.0,
+              "area_m2": 120.0
+            }
+          ],
+          "reference": null,
+          "warnings": [
+            "La demanda nominal alcanza o supera el servicio; no existe régimen estacionario estable. La simulación finita conserva los pendientes."
+          ],
+          "assumptions": [
+            "Modelo híbrido: SUMO striping calcula los recorridos planos; eventos discretos resuelven una fila común FCFS por estación, sin abandono ni prioridades.",
+            "El servicio y las escaleras se representan por capacidades introducidas. La escalera es un punto de servicio equivalente; no se simulan peldaños ni geometría vertical.",
+            "Las filas tienen almacenamiento ilimitado. El área sólo convierte acumulación en densidad; no impone bloqueo, derrame físico ni realimentación hacia los recorridos anteriores.",
+            "Cada tramo peatonal se simula por separado. El flujo entre tramos se conserva mediante los instantes de salida del servicio; no existe interacción espacial entre tramos.",
+            "Cola excluye personas atendidas. Acumulación del área incluye cola y personas en servicio. Densidad es global por área, sin umbrales normativos ni mapa local.",
+            "El periodo observado excluye calentamiento. Después cesan las llegadas y se permite el despeje configurado. Los pendientes y las esperas censuradas se informan explícitamente.",
+            "Erlang C sólo aplica a un acceso con llegadas Poisson, servicio exponencial y rho < 1. Es una referencia estacionaria, distinta de la simulación híbrida finita."
+          ],
+          "created_at": "2026-10-26T04:55:57.009510+00:00"
+        },
+        "simulation": {
+          "inputs": {
+            "layout": "metro_exit",
+            "device": "turnstile",
+            "arrival": "batch",
+            "service": "constant",
+            "service_basis": "time",
+            "devices": 2,
+            "service_s": 2.0,
+            "service_pph": 1800,
+            "rate_pph": 2400,
+            "passengers": 300,
+            "cycle_s": 180.0,
+            "release_s": 30.0,
+            "approach_m": 15.0,
+            "transfer_m": 20.0,
+            "exit_m": 15.0,
+            "width_m": 3.0,
+            "speed_mps": 1.2,
+            "waiting_length_m": 20.0,
+            "waiting_width_m": 6.0,
+            "stairs": 2,
+            "stair_pph": 3600.0,
+            "platform_m2": 180.0,
+            "duration_s": 540.0,
+            "warmup_s": 0.0,
+            "clearance_s": 900.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "49ce9644b7eead74c5f3033ccd089d73e5104329f9aee554ae2eb3454fa79891",
+          "analytical": {
+            "inputs": {
+              "layout": "metro_exit",
+              "device": "turnstile",
+              "arrival": "batch",
+              "service": "constant",
+              "service_basis": "time",
+              "devices": 2,
+              "service_s": 2.0,
+              "service_pph": 1800,
+              "rate_pph": 2400,
+              "passengers": 300,
+              "cycle_s": 180.0,
+              "release_s": 30.0,
+              "approach_m": 15.0,
+              "transfer_m": 20.0,
+              "exit_m": 15.0,
+              "width_m": 3.0,
+              "speed_mps": 1.2,
+              "waiting_length_m": 20.0,
+              "waiting_width_m": 6.0,
+              "stairs": 2,
+              "stair_pph": 3600.0,
+              "platform_m2": 180.0,
+              "duration_s": 540.0,
+              "warmup_s": 0.0,
+              "clearance_s": 900.0,
+              "bin_s": 30.0,
+              "seed": 42
+            },
+            "signature": "49ce9644b7eead74c5f3033ccd089d73e5104329f9aee554ae2eb3454fa79891",
+            "metrics": {
+              "Demanda media nominal (peat/h)": 6000.0,
+              "Capacidad de servicio (peat/h)": 3600.0,
+              "Demanda / capacidad": 1.6666666666666667,
+              "Crecimiento nominal si sobrecarga (peat/min)": 40.0,
+              "Capacidad de servicio por intervalo (peat)": 180.0,
+              "Reserva nominal por intervalo (peat)": -120.0,
+              "Cota de atención de una descarga aislada (s)": 300.0
+            },
+            "stages": [
+              {
+                "key": "stairs",
+                "label": "Escaleras · capacidad equivalente",
+                "servers": 2,
+                "mean_s": 1.0,
+                "area_m2": 180.0
+              },
+              {
+                "key": "gate",
+                "label": "Torniquetes",
+                "servers": 2,
+                "mean_s": 2.0,
+                "area_m2": 120.0
+              }
+            ],
+            "reference": null,
+            "warnings": [
+              "La demanda nominal alcanza o supera el servicio; no existe régimen estacionario estable. La simulación finita conserva los pendientes."
+            ],
+            "assumptions": [
+              "Modelo híbrido: SUMO striping calcula los recorridos planos; eventos discretos resuelven una fila común FCFS por estación, sin abandono ni prioridades.",
+              "El servicio y las escaleras se representan por capacidades introducidas. La escalera es un punto de servicio equivalente; no se simulan peldaños ni geometría vertical.",
+              "Las filas tienen almacenamiento ilimitado. El área sólo convierte acumulación en densidad; no impone bloqueo, derrame físico ni realimentación hacia los recorridos anteriores.",
+              "Cada tramo peatonal se simula por separado. El flujo entre tramos se conserva mediante los instantes de salida del servicio; no existe interacción espacial entre tramos.",
+              "Cola excluye personas atendidas. Acumulación del área incluye cola y personas en servicio. Densidad es global por área, sin umbrales normativos ni mapa local.",
+              "El periodo observado excluye calentamiento. Después cesan las llegadas y se permite el despeje configurado. Los pendientes y las esperas censuradas se informan explícitamente.",
+              "Erlang C sólo aplica a un acceso con llegadas Poisson, servicio exponencial y rho < 1. Es una referencia estacionaria, distinta de la simulación híbrida finita."
+            ],
+            "created_at": "2026-10-26T04:55:57.009510+00:00"
+          },
+          "created_at": "2026-10-26T04:55:58.261773+00:00",
+          "engine_version": "Eclipse SUMO sumo 1.28.0",
+          "summary": {
+            "generated": 900,
+            "completed": 900,
+            "pending": 0,
+            "cohort_generated": 900,
+            "cohort_completed": 900,
+            "mean_wait_s": 229.54555555555555,
+            "max_wait_s": 442.0,
+            "p95_wait_s": 417.0,
+            "mean_trip_s": 305.4888888888889,
+            "mean_system": 353.1333333333332,
+            "max_system": 561,
+            "clearance_s": 410.0,
+            "pending_at_observation_end": 411
+          },
+          "stages": [
+            {
+              "key": "stairs",
+              "label": "Escaleras · capacidad equivalente",
+              "servers": 2,
+              "mean_s": 1.0,
+              "area_m2": 180.0,
+              "arrived": 900,
+              "processed": 900,
+              "pending": 0,
+              "mean_queue": 60.474074074074075,
+              "max_queue": 133,
+              "mean_accumulation": 62.14074074074074,
+              "max_accumulation": 135,
+              "density": 0.3452263374485597,
+              "max_density": 0.75,
+              "utilization": 0.8333333333333334,
+              "mean_wait_s": 36.284444444444446,
+              "max_wait_s": 67.0,
+              "p95_wait_s": 62.0,
+              "wait_sample": 900,
+              "wait_censored": 0,
+              "pending_at_observation_end": 0
+            },
+            {
+              "key": "gate",
+              "label": "Torniquetes",
+              "servers": 2,
+              "mean_s": 2.0,
+              "area_m2": 120.0,
+              "arrived": 900,
+              "processed": 900,
+              "pending": 0,
+              "mean_queue": 178.42962962962963,
+              "max_queue": 382,
+              "mean_accumulation": 180.3,
+              "max_accumulation": 384,
+              "density": 1.5025000000000002,
+              "max_density": 3.2,
+              "utilization": 0.9351851851851852,
+              "mean_wait_s": 190.6689189189189,
+              "max_wait_s": 382.0,
+              "p95_wait_s": 359.65,
+              "wait_sample": 888,
+              "wait_censored": 0,
+              "pending_at_observation_end": 384
+            }
+          ],
+          "series": [
+            {
+              "time_s": 0.0,
+              "interval_s": 30.0,
+              "generated": 300,
+              "completed": 0,
+              "mean_system": 149.99999999999997,
+              "stairs_queue": 6.666666666666667,
+              "stairs_density": 0.04240740740740741,
+              "gate_queue": 0.0,
+              "gate_density": 0.0
+            },
+            {
+              "time_s": 30.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 9,
+              "mean_system": 298.46666666666664,
+              "stairs_queue": 73.2,
+              "stairs_density": 0.4177777777777778,
+              "gate_queue": 8.4,
+              "gate_density": 0.08388888888888889
+            },
+            {
+              "time_s": 60.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 275.5,
+              "stairs_queue": 109.8,
+              "stairs_density": 0.6211111111111111,
+              "gate_queue": 37.53333333333333,
+              "gate_density": 0.32944444444444443
+            },
+            {
+              "time_s": 90.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 245.5,
+              "stairs_queue": 109.63333333333334,
+              "stairs_density": 0.6201851851851852,
+              "gate_queue": 67.3,
+              "gate_density": 0.5775
+            },
+            {
+              "time_s": 120.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 29,
+              "mean_system": 215.5,
+              "stairs_queue": 60.0,
+              "stairs_density": 0.34444444444444444,
+              "gate_queue": 97.6,
+              "gate_density": 0.83
+            },
+            {
+              "time_s": 150.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 31,
+              "mean_system": 185.5,
+              "stairs_queue": 7.5,
+              "stairs_density": 0.047407407407407405,
+              "gate_queue": 127.26666666666667,
+              "gate_density": 1.0772222222222223
+            },
+            {
+              "time_s": 180.0,
+              "interval_s": 30.0,
+              "generated": 300,
+              "completed": 30,
+              "mean_system": 305.5333333333326,
+              "stairs_queue": 6.6,
+              "stairs_density": 0.04203703703703703,
+              "gate_queue": 137.9,
+              "gate_density": 1.1658333333333333
+            },
+            {
+              "time_s": 210.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 425.5,
+              "stairs_queue": 68.46666666666667,
+              "stairs_density": 0.3914814814814815,
+              "gate_queue": 128.76666666666668,
+              "gate_density": 1.0897222222222223
+            },
+            {
+              "time_s": 240.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 395.4666666666664,
+              "stairs_queue": 119.13333333333334,
+              "stairs_density": 0.672962962962963,
+              "gate_queue": 157.76666666666668,
+              "gate_density": 1.331388888888889
+            },
+            {
+              "time_s": 270.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 365.43333333333334,
+              "stairs_queue": 116.93333333333334,
+              "stairs_density": 0.6607407407407407,
+              "gate_queue": 187.46666666666667,
+              "gate_density": 1.578888888888889
+            },
+            {
+              "time_s": 300.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 335.46666666666664,
+              "stairs_queue": 60.0,
+              "stairs_density": 0.34444444444444444,
+              "gate_queue": 217.46666666666667,
+              "gate_density": 1.828888888888889
+            },
+            {
+              "time_s": 330.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 305.5,
+              "stairs_queue": 7.5,
+              "stairs_density": 0.047407407407407405,
+              "gate_queue": 247.66666666666666,
+              "gate_density": 2.0805555555555553
+            },
+            {
+              "time_s": 360.0,
+              "interval_s": 30.0,
+              "generated": 300,
+              "completed": 30,
+              "mean_system": 425.4666666666662,
+              "stairs_queue": 6.8,
+              "stairs_density": 0.04314814814814815,
+              "gate_queue": 257.9,
+              "gate_density": 2.165833333333333
+            },
+            {
+              "time_s": 390.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 545.4999999999995,
+              "stairs_queue": 70.26666666666667,
+              "stairs_density": 0.4014814814814815,
+              "gate_queue": 248.66666666666666,
+              "gate_density": 2.088888888888889
+            },
+            {
+              "time_s": 420.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 515.5333333333333,
+              "stairs_queue": 94.96666666666667,
+              "stairs_density": 0.5387037037037037,
+              "gate_queue": 277.4,
+              "gate_density": 2.328333333333333
+            },
+            {
+              "time_s": 450.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 485.5,
+              "stairs_queue": 103.56666666666666,
+              "stairs_density": 0.5864814814814815,
+              "gate_queue": 307.53333333333336,
+              "gate_density": 2.579444444444445
+            },
+            {
+              "time_s": 480.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 455.5,
+              "stairs_queue": 60.0,
+              "stairs_density": 0.34444444444444444,
+              "gate_queue": 337.5,
+              "gate_density": 2.8291666666666666
+            },
+            {
+              "time_s": 510.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 30,
+              "mean_system": 425.53333333333336,
+              "stairs_queue": 7.5,
+              "stairs_density": 0.047407407407407405,
+              "gate_queue": 367.6,
+              "gate_density": 3.08
+            }
+          ],
+          "histogram": [
+            {
+              "start_s": 0.0,
+              "end_s": 22.1,
+              "count": 33
+            },
+            {
+              "start_s": 22.1,
+              "end_s": 44.2,
+              "count": 28
+            },
+            {
+              "start_s": 44.2,
+              "end_s": 66.30000000000001,
+              "count": 28
+            },
+            {
+              "start_s": 66.30000000000001,
+              "end_s": 88.4,
+              "count": 28
+            },
+            {
+              "start_s": 88.4,
+              "end_s": 110.5,
+              "count": 27
+            },
+            {
+              "start_s": 110.5,
+              "end_s": 132.60000000000002,
+              "count": 47
+            },
+            {
+              "start_s": 132.60000000000002,
+              "end_s": 154.70000000000002,
+              "count": 65
+            },
+            {
+              "start_s": 154.70000000000002,
+              "end_s": 176.8,
+              "count": 66
+            },
+            {
+              "start_s": 176.8,
+              "end_s": 198.9,
+              "count": 67
+            },
+            {
+              "start_s": 198.9,
+              "end_s": 221.0,
+              "count": 43
+            },
+            {
+              "start_s": 221.0,
+              "end_s": 243.10000000000002,
+              "count": 38
+            },
+            {
+              "start_s": 243.10000000000002,
+              "end_s": 265.20000000000005,
+              "count": 57
+            },
+            {
+              "start_s": 265.20000000000005,
+              "end_s": 287.3,
+              "count": 61
+            },
+            {
+              "start_s": 287.3,
+              "end_s": 309.40000000000003,
+              "count": 63
+            },
+            {
+              "start_s": 309.40000000000003,
+              "end_s": 331.5,
+              "count": 65
+            },
+            {
+              "start_s": 331.5,
+              "end_s": 353.6,
+              "count": 32
+            },
+            {
+              "start_s": 353.6,
+              "end_s": 375.70000000000005,
+              "count": 34
+            },
+            {
+              "start_s": 375.70000000000005,
+              "end_s": 397.8,
+              "count": 40
+            },
+            {
+              "start_s": 397.8,
+              "end_s": 419.90000000000003,
+              "count": 37
+            },
+            {
+              "start_s": 419.90000000000003,
+              "end_s": 442.0,
+              "count": 41
+            }
+          ],
+          "train_residuals": [
+            {
+              "time_s": 180.0,
+              "remaining": 171
+            },
+            {
+              "time_s": 360.0,
+              "remaining": 291
+            }
+          ],
+          "warnings": [
+            "La demanda nominal alcanza o supera el servicio; no existe régimen estacionario estable. La simulación finita conserva los pendientes."
+          ],
+          "definitions": [
+            "Modelo híbrido: SUMO striping calcula los recorridos planos; eventos discretos resuelven una fila común FCFS por estación, sin abandono ni prioridades.",
+            "El servicio y las escaleras se representan por capacidades introducidas. La escalera es un punto de servicio equivalente; no se simulan peldaños ni geometría vertical.",
+            "Las filas tienen almacenamiento ilimitado. El área sólo convierte acumulación en densidad; no impone bloqueo, derrame físico ni realimentación hacia los recorridos anteriores.",
+            "Cada tramo peatonal se simula por separado. El flujo entre tramos se conserva mediante los instantes de salida del servicio; no existe interacción espacial entre tramos.",
+            "Cola excluye personas atendidas. Acumulación del área incluye cola y personas en servicio. Densidad es global por área, sin umbrales normativos ni mapa local.",
+            "El periodo observado excluye calentamiento. Después cesan las llegadas y se permite el despeje configurado. Los pendientes y las esperas censuradas se informan explícitamente.",
+            "Erlang C sólo aplica a un acceso con llegadas Poisson, servicio exponencial y rho < 1. Es una referencia estacionaria, distinta de la simulación híbrida finita."
+          ]
+        }
+      },
+      {
+        "id": "a36bb98a24d14229862b3290926369c1",
+        "name": "Descarga Metro · 4 torniquetes",
+        "inputs": {
+          "layout": "metro_exit",
+          "device": "turnstile",
+          "arrival": "batch",
+          "service": "constant",
+          "service_basis": "time",
+          "devices": 4,
+          "service_s": 2.0,
+          "service_pph": 1800,
+          "rate_pph": 2400,
+          "passengers": 300,
+          "cycle_s": 180.0,
+          "release_s": 30.0,
+          "approach_m": 15.0,
+          "transfer_m": 20.0,
+          "exit_m": 15.0,
+          "width_m": 3.0,
+          "speed_mps": 1.2,
+          "waiting_length_m": 20.0,
+          "waiting_width_m": 6.0,
+          "stairs": 2,
+          "stair_pph": 3600.0,
+          "platform_m2": 180.0,
+          "duration_s": 540.0,
+          "warmup_s": 0.0,
+          "clearance_s": 900.0,
+          "bin_s": 30.0,
+          "seed": 42
+        },
+        "origins": {
+          "layout": "default",
+          "device": "default",
+          "arrival": "default",
+          "service": "default",
+          "service_basis": "default",
+          "devices": "default",
+          "service_s": "default",
+          "service_pph": "default",
+          "rate_pph": "default",
+          "passengers": "default",
+          "cycle_s": "default",
+          "release_s": "default",
+          "approach_m": "default",
+          "transfer_m": "default",
+          "exit_m": "default",
+          "width_m": "default",
+          "speed_mps": "default",
+          "waiting_length_m": "default",
+          "waiting_width_m": "default",
+          "stairs": "default",
+          "stair_pph": "default",
+          "platform_m2": "default",
+          "duration_s": "default",
+          "warmup_s": "default",
+          "clearance_s": "default",
+          "bin_s": "default",
+          "seed": "default"
+        },
+        "analytical": {
+          "inputs": {
+            "layout": "metro_exit",
+            "device": "turnstile",
+            "arrival": "batch",
+            "service": "constant",
+            "service_basis": "time",
+            "devices": 4,
+            "service_s": 2.0,
+            "service_pph": 1800,
+            "rate_pph": 2400,
+            "passengers": 300,
+            "cycle_s": 180.0,
+            "release_s": 30.0,
+            "approach_m": 15.0,
+            "transfer_m": 20.0,
+            "exit_m": 15.0,
+            "width_m": 3.0,
+            "speed_mps": 1.2,
+            "waiting_length_m": 20.0,
+            "waiting_width_m": 6.0,
+            "stairs": 2,
+            "stair_pph": 3600.0,
+            "platform_m2": 180.0,
+            "duration_s": 540.0,
+            "warmup_s": 0.0,
+            "clearance_s": 900.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "aec98e0116b9cb175454f85c26868e8c188662f7d1547a8f56db456270b6ac1c",
+          "metrics": {
+            "Demanda media nominal (peat/h)": 6000.0,
+            "Capacidad de servicio (peat/h)": 7200.0,
+            "Demanda / capacidad": 0.8333333333333334,
+            "Crecimiento nominal si sobrecarga (peat/min)": 0.0,
+            "Capacidad de servicio por intervalo (peat)": 360.0,
+            "Reserva nominal por intervalo (peat)": 60.0,
+            "Cota de atención de una descarga aislada (s)": 150.0
+          },
+          "stages": [
+            {
+              "key": "stairs",
+              "label": "Escaleras · capacidad equivalente",
+              "servers": 2,
+              "mean_s": 1.0,
+              "area_m2": 180.0
+            },
+            {
+              "key": "gate",
+              "label": "Torniquetes",
+              "servers": 4,
+              "mean_s": 2.0,
+              "area_m2": 120.0
+            }
+          ],
+          "reference": null,
+          "warnings": [],
+          "assumptions": [
+            "Modelo híbrido: SUMO striping calcula los recorridos planos; eventos discretos resuelven una fila común FCFS por estación, sin abandono ni prioridades.",
+            "El servicio y las escaleras se representan por capacidades introducidas. La escalera es un punto de servicio equivalente; no se simulan peldaños ni geometría vertical.",
+            "Las filas tienen almacenamiento ilimitado. El área sólo convierte acumulación en densidad; no impone bloqueo, derrame físico ni realimentación hacia los recorridos anteriores.",
+            "Cada tramo peatonal se simula por separado. El flujo entre tramos se conserva mediante los instantes de salida del servicio; no existe interacción espacial entre tramos.",
+            "Cola excluye personas atendidas. Acumulación del área incluye cola y personas en servicio. Densidad es global por área, sin umbrales normativos ni mapa local.",
+            "El periodo observado excluye calentamiento. Después cesan las llegadas y se permite el despeje configurado. Los pendientes y las esperas censuradas se informan explícitamente.",
+            "Erlang C sólo aplica a un acceso con llegadas Poisson, servicio exponencial y rho < 1. Es una referencia estacionaria, distinta de la simulación híbrida finita."
+          ],
+          "created_at": "2026-10-26T04:55:58.264882+00:00"
+        },
+        "simulation": {
+          "inputs": {
+            "layout": "metro_exit",
+            "device": "turnstile",
+            "arrival": "batch",
+            "service": "constant",
+            "service_basis": "time",
+            "devices": 4,
+            "service_s": 2.0,
+            "service_pph": 1800,
+            "rate_pph": 2400,
+            "passengers": 300,
+            "cycle_s": 180.0,
+            "release_s": 30.0,
+            "approach_m": 15.0,
+            "transfer_m": 20.0,
+            "exit_m": 15.0,
+            "width_m": 3.0,
+            "speed_mps": 1.2,
+            "waiting_length_m": 20.0,
+            "waiting_width_m": 6.0,
+            "stairs": 2,
+            "stair_pph": 3600.0,
+            "platform_m2": 180.0,
+            "duration_s": 540.0,
+            "warmup_s": 0.0,
+            "clearance_s": 900.0,
+            "bin_s": 30.0,
+            "seed": 42
+          },
+          "signature": "aec98e0116b9cb175454f85c26868e8c188662f7d1547a8f56db456270b6ac1c",
+          "analytical": {
+            "inputs": {
+              "layout": "metro_exit",
+              "device": "turnstile",
+              "arrival": "batch",
+              "service": "constant",
+              "service_basis": "time",
+              "devices": 4,
+              "service_s": 2.0,
+              "service_pph": 1800,
+              "rate_pph": 2400,
+              "passengers": 300,
+              "cycle_s": 180.0,
+              "release_s": 30.0,
+              "approach_m": 15.0,
+              "transfer_m": 20.0,
+              "exit_m": 15.0,
+              "width_m": 3.0,
+              "speed_mps": 1.2,
+              "waiting_length_m": 20.0,
+              "waiting_width_m": 6.0,
+              "stairs": 2,
+              "stair_pph": 3600.0,
+              "platform_m2": 180.0,
+              "duration_s": 540.0,
+              "warmup_s": 0.0,
+              "clearance_s": 900.0,
+              "bin_s": 30.0,
+              "seed": 42
+            },
+            "signature": "aec98e0116b9cb175454f85c26868e8c188662f7d1547a8f56db456270b6ac1c",
+            "metrics": {
+              "Demanda media nominal (peat/h)": 6000.0,
+              "Capacidad de servicio (peat/h)": 7200.0,
+              "Demanda / capacidad": 0.8333333333333334,
+              "Crecimiento nominal si sobrecarga (peat/min)": 0.0,
+              "Capacidad de servicio por intervalo (peat)": 360.0,
+              "Reserva nominal por intervalo (peat)": 60.0,
+              "Cota de atención de una descarga aislada (s)": 150.0
+            },
+            "stages": [
+              {
+                "key": "stairs",
+                "label": "Escaleras · capacidad equivalente",
+                "servers": 2,
+                "mean_s": 1.0,
+                "area_m2": 180.0
+              },
+              {
+                "key": "gate",
+                "label": "Torniquetes",
+                "servers": 4,
+                "mean_s": 2.0,
+                "area_m2": 120.0
+              }
+            ],
+            "reference": null,
+            "warnings": [],
+            "assumptions": [
+              "Modelo híbrido: SUMO striping calcula los recorridos planos; eventos discretos resuelven una fila común FCFS por estación, sin abandono ni prioridades.",
+              "El servicio y las escaleras se representan por capacidades introducidas. La escalera es un punto de servicio equivalente; no se simulan peldaños ni geometría vertical.",
+              "Las filas tienen almacenamiento ilimitado. El área sólo convierte acumulación en densidad; no impone bloqueo, derrame físico ni realimentación hacia los recorridos anteriores.",
+              "Cada tramo peatonal se simula por separado. El flujo entre tramos se conserva mediante los instantes de salida del servicio; no existe interacción espacial entre tramos.",
+              "Cola excluye personas atendidas. Acumulación del área incluye cola y personas en servicio. Densidad es global por área, sin umbrales normativos ni mapa local.",
+              "El periodo observado excluye calentamiento. Después cesan las llegadas y se permite el despeje configurado. Los pendientes y las esperas censuradas se informan explícitamente.",
+              "Erlang C sólo aplica a un acceso con llegadas Poisson, servicio exponencial y rho < 1. Es una referencia estacionaria, distinta de la simulación híbrida finita."
+            ],
+            "created_at": "2026-10-26T04:55:58.264882+00:00"
+          },
+          "created_at": "2026-10-26T04:55:59.488014+00:00",
+          "engine_version": "Eclipse SUMO sumo 1.28.0",
+          "summary": {
+            "generated": 900,
+            "completed": 900,
+            "pending": 0,
+            "cohort_generated": 900,
+            "cohort_completed": 900,
+            "mean_wait_s": 36.784444444444446,
+            "max_wait_s": 68.0,
+            "p95_wait_s": 62.0,
+            "mean_trip_s": 113.18111111111111,
+            "mean_system": 187.61666666666656,
+            "max_system": 300,
+            "clearance_s": 23.0,
+            "pending_at_observation_end": 48
+          },
+          "stages": [
+            {
+              "key": "stairs",
+              "label": "Escaleras · capacidad equivalente",
+              "servers": 2,
+              "mean_s": 1.0,
+              "area_m2": 180.0,
+              "arrived": 900,
+              "processed": 900,
+              "pending": 0,
+              "mean_queue": 60.474074074074075,
+              "max_queue": 133,
+              "mean_accumulation": 62.14074074074074,
+              "max_accumulation": 135,
+              "density": 0.3452263374485597,
+              "max_density": 0.75,
+              "utilization": 0.8333333333333334,
+              "mean_wait_s": 36.284444444444446,
+              "max_wait_s": 67.0,
+              "p95_wait_s": 62.0,
+              "wait_sample": 900,
+              "wait_censored": 0,
+              "pending_at_observation_end": 0
+            },
+            {
+              "key": "gate",
+              "label": "Torniquetes",
+              "servers": 4,
+              "mean_s": 2.0,
+              "area_m2": 120.0,
+              "arrived": 900,
+              "processed": 900,
+              "pending": 0,
+              "mean_queue": 0.8203703703703704,
+              "max_queue": 3,
+              "mean_accumulation": 4.098148148148148,
+              "max_accumulation": 7,
+              "density": 0.034151234567901236,
+              "max_density": 0.058333333333333334,
+              "utilization": 0.8194444444444444,
+              "mean_wait_s": 0.4988738738738739,
+              "max_wait_s": 2.0,
+              "p95_wait_s": 1.0,
+              "wait_sample": 888,
+              "wait_censored": 0,
+              "pending_at_observation_end": 6
+            }
+          ],
+          "series": [
+            {
+              "time_s": 0.0,
+              "interval_s": 30.0,
+              "generated": 300,
+              "completed": 0,
+              "mean_system": 149.99999999999997,
+              "stairs_queue": 6.666666666666667,
+              "stairs_density": 0.04240740740740741,
+              "gate_queue": 0.0,
+              "gate_density": 0.0
+            },
+            {
+              "time_s": 30.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 14,
+              "mean_system": 298.0,
+              "stairs_queue": 73.2,
+              "stairs_density": 0.4177777777777778,
+              "gate_queue": 0.23333333333333334,
+              "gate_density": 0.0275
+            },
+            {
+              "time_s": 60.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 59,
+              "mean_system": 256.0,
+              "stairs_queue": 109.8,
+              "stairs_density": 0.6211111111111111,
+              "gate_queue": 0.6333333333333333,
+              "gate_density": 0.03833333333333333
+            },
+            {
+              "time_s": 90.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 59,
+              "mean_system": 196.13333333333333,
+              "stairs_queue": 109.63333333333334,
+              "stairs_density": 0.6201851851851852,
+              "gate_queue": 1.1666666666666667,
+              "gate_density": 0.04277777777777778
+            },
+            {
+              "time_s": 120.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 59,
+              "mean_system": 137.1,
+              "stairs_queue": 60.0,
+              "stairs_density": 0.34444444444444444,
+              "gate_queue": 1.6,
+              "gate_density": 0.04666666666666666
+            },
+            {
+              "time_s": 150.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 61,
+              "mean_system": 77.1,
+              "stairs_queue": 7.5,
+              "stairs_density": 0.047407407407407405,
+              "gate_queue": 1.2666666666666666,
+              "gate_density": 0.04388888888888889
+            },
+            {
+              "time_s": 180.0,
+              "interval_s": 30.0,
+              "generated": 300,
+              "completed": 48,
+              "mean_system": 168.2666666666674,
+              "stairs_queue": 6.6,
+              "stairs_density": 0.04203703703703703,
+              "gate_queue": 0.3,
+              "gate_density": 0.010833333333333334
+            },
+            {
+              "time_s": 210.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 13,
+              "mean_system": 298.0000000000002,
+              "stairs_queue": 68.46666666666667,
+              "stairs_density": 0.3914814814814815,
+              "gate_queue": 0.43333333333333335,
+              "gate_density": 0.029166666666666667
+            },
+            {
+              "time_s": 240.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 59,
+              "mean_system": 256.2,
+              "stairs_queue": 119.13333333333334,
+              "stairs_density": 0.672962962962963,
+              "gate_queue": 0.7666666666666667,
+              "gate_density": 0.03972222222222222
+            },
+            {
+              "time_s": 270.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 61,
+              "mean_system": 195.9,
+              "stairs_queue": 116.93333333333334,
+              "stairs_density": 0.6607407407407407,
+              "gate_queue": 0.4666666666666667,
+              "gate_density": 0.037222222222222226
+            },
+            {
+              "time_s": 300.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 59,
+              "mean_system": 136.1,
+              "stairs_queue": 60.0,
+              "stairs_density": 0.34444444444444444,
+              "gate_queue": 0.9333333333333333,
+              "gate_density": 0.04083333333333334
+            },
+            {
+              "time_s": 330.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 61,
+              "mean_system": 75.96666666666667,
+              "stairs_queue": 7.5,
+              "stairs_density": 0.047407407407407405,
+              "gate_queue": 1.1666666666666667,
+              "gate_density": 0.043055555555555555
+            },
+            {
+              "time_s": 360.0,
+              "interval_s": 30.0,
+              "generated": 300,
+              "completed": 47,
+              "mean_system": 167.4999999999971,
+              "stairs_queue": 6.8,
+              "stairs_density": 0.04314814814814815,
+              "gate_queue": 0.2,
+              "gate_density": 0.009722222222222222
+            },
+            {
+              "time_s": 390.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 14,
+              "mean_system": 297.9,
+              "stairs_queue": 70.26666666666667,
+              "stairs_density": 0.4014814814814815,
+              "gate_queue": 0.16666666666666666,
+              "gate_density": 0.026944444444444444
+            },
+            {
+              "time_s": 420.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 60,
+              "mean_system": 256.1333333333333,
+              "stairs_queue": 94.96666666666667,
+              "stairs_density": 0.5387037037037037,
+              "gate_queue": 0.8,
+              "gate_density": 0.03944444444444444
+            },
+            {
+              "time_s": 450.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 58,
+              "mean_system": 196.73333333333332,
+              "stairs_queue": 103.56666666666666,
+              "stairs_density": 0.5864814814814815,
+              "gate_queue": 1.5333333333333334,
+              "gate_density": 0.04611111111111111
+            },
+            {
+              "time_s": 480.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 61,
+              "mean_system": 137.0,
+              "stairs_queue": 60.0,
+              "stairs_density": 0.34444444444444444,
+              "gate_queue": 1.5,
+              "gate_density": 0.04583333333333333
+            },
+            {
+              "time_s": 510.0,
+              "interval_s": 30.0,
+              "generated": 0,
+              "completed": 59,
+              "mean_system": 77.06666666666666,
+              "stairs_queue": 7.5,
+              "stairs_density": 0.047407407407407405,
+              "gate_queue": 1.6,
+              "gate_density": 0.04666666666666666
+            }
+          ],
+          "histogram": [
+            {
+              "start_s": 0.0,
+              "end_s": 3.4,
+              "count": 47
+            },
+            {
+              "start_s": 3.4,
+              "end_s": 6.8,
+              "count": 34
+            },
+            {
+              "start_s": 6.8,
+              "end_s": 10.2,
+              "count": 49
+            },
+            {
+              "start_s": 10.2,
+              "end_s": 13.6,
+              "count": 33
+            },
+            {
+              "start_s": 13.6,
+              "end_s": 17.0,
+              "count": 27
+            },
+            {
+              "start_s": 17.0,
+              "end_s": 20.4,
+              "count": 39
+            },
+            {
+              "start_s": 20.4,
+              "end_s": 23.8,
+              "count": 35
+            },
+            {
+              "start_s": 23.8,
+              "end_s": 27.2,
+              "count": 37
+            },
+            {
+              "start_s": 27.2,
+              "end_s": 30.599999999999998,
+              "count": 34
+            },
+            {
+              "start_s": 30.599999999999998,
+              "end_s": 34.0,
+              "count": 31
+            },
+            {
+              "start_s": 34.0,
+              "end_s": 37.4,
+              "count": 36
+            },
+            {
+              "start_s": 37.4,
+              "end_s": 40.8,
+              "count": 31
+            },
+            {
+              "start_s": 40.8,
+              "end_s": 44.199999999999996,
+              "count": 50
+            },
+            {
+              "start_s": 44.199999999999996,
+              "end_s": 47.6,
+              "count": 69
+            },
+            {
+              "start_s": 47.6,
+              "end_s": 51.0,
+              "count": 48
+            },
+            {
+              "start_s": 51.0,
+              "end_s": 54.4,
+              "count": 103
+            },
+            {
+              "start_s": 54.4,
+              "end_s": 57.8,
+              "count": 85
+            },
+            {
+              "start_s": 57.8,
+              "end_s": 61.199999999999996,
+              "count": 60
+            },
+            {
+              "start_s": 61.199999999999996,
+              "end_s": 64.6,
+              "count": 26
+            },
+            {
+              "start_s": 64.6,
+              "end_s": 68.0,
+              "count": 26
+            }
+          ],
+          "train_residuals": [
+            {
+              "time_s": 180.0,
+              "remaining": 48
+            },
+            {
+              "time_s": 360.0,
+              "remaining": 47
+            }
+          ],
+          "warnings": [],
+          "definitions": [
+            "Modelo híbrido: SUMO striping calcula los recorridos planos; eventos discretos resuelven una fila común FCFS por estación, sin abandono ni prioridades.",
+            "El servicio y las escaleras se representan por capacidades introducidas. La escalera es un punto de servicio equivalente; no se simulan peldaños ni geometría vertical.",
+            "Las filas tienen almacenamiento ilimitado. El área sólo convierte acumulación en densidad; no impone bloqueo, derrame físico ni realimentación hacia los recorridos anteriores.",
+            "Cada tramo peatonal se simula por separado. El flujo entre tramos se conserva mediante los instantes de salida del servicio; no existe interacción espacial entre tramos.",
+            "Cola excluye personas atendidas. Acumulación del área incluye cola y personas en servicio. Densidad es global por área, sin umbrales normativos ni mapa local.",
+            "El periodo observado excluye calentamiento. Después cesan las llegadas y se permite el despeje configurado. Los pendientes y las esperas censuradas se informan explícitamente.",
+            "Erlang C sólo aplica a un acceso con llegadas Poisson, servicio exponencial y rho < 1. Es una referencia estacionaria, distinta de la simulación híbrida finita."
+          ]
+        }
+      }
+    ],
+    "selected_id": "e002b88fea89444d8765a84bbfb391c0"
+  }
+}

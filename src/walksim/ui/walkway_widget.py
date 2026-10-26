@@ -786,7 +786,10 @@ class WalkwayWidget(QWidget):
         if not self.fresh(self.current, "simulation"):
             return
         path, _ = QFileDialog.getSaveFileName(
-            self, "Guardar gráficas", "walkway.png", "PNG (*.png);;PDF (*.pdf)"
+            self,
+            "Guardar gráficas",
+            getattr(self, "export_stem", "walkway") + ".png",
+            "PNG (*.png);;PDF (*.pdf)",
         )
         if path:
             try:
@@ -817,7 +820,10 @@ class WalkwayWidget(QWidget):
         if not self.fresh(self.current, "simulation"):
             return
         path, _ = QFileDialog.getSaveFileName(
-            self, "Exportar series", "series_walkway.csv", "CSV (*.csv)"
+            self,
+            "Exportar series",
+            "series_" + getattr(self, "export_stem", "walkway") + ".csv",
+            "CSV (*.csv)",
         )
         if path:
             try:
