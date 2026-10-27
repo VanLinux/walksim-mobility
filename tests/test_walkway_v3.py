@@ -115,7 +115,7 @@ def test_v2_migration_preserves_original_and_writes_schema6(tmp_path):
     state.walkway = dict(cases=[case], selected_id=case["id"], chart="speed")
     save_project(state, path)
     assert (tmp_path / "old.v2-backup.wksim").read_bytes() == previous
-    assert json.loads(path.read_text())["schema_version"] == 6
+    assert json.loads(path.read_text())["schema_version"] == 7
     loaded = load_project(path)
     assert loaded.walkway["cases"][0]["inputs"]["speed_mps"] == "borrador incompleto"
     assert loaded.walkway["cases"][0]["analytical"]["metrics"]

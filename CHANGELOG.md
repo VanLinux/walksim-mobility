@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## 3.4.0 — Fase 6: cruce semaforizado
+
+- Un cruce peatonal aislado con ciclo fijo y fases separadas para vehículos, inicio peatonal y despeje.
+- Cuatro indicadores principales: referencia L/v, espera media, cola máxima por acera y completados/programados.
+- Conteos por sentido, pendientes de inserción/espera/cruce, muestreo de 0.5 s y aviso de censura.
+- Caso base y una alternativa, esquema de cruce, opciones de simulación desplegables y temas claro/oscuro.
+- CSV guía e importación validada, comparación/series CSV, gráficas y reporte LaTeX con analista.
+- Proyecto .wksim esquema 7, lectura de versiones previas y copia de respaldo al sobrescribir esquema 6.
+- Sin LOS HCM, optimización semafórica ni evaluación de seguridad. La Fase 4 continúa pendiente.
+
+
 ## 3.3.0 — 25 de octubre de 2026 · Fase 5: Senderos compartidos
 
 - Nuevo módulo con PLOS y BLOS por sentido, selección de análisis y demanda horaria o conteos de 15 min.

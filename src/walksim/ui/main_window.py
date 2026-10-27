@@ -49,6 +49,7 @@ from walksim.report import write_report
 from walksim.sumo.runner import run_corridor_simulation
 from walksim.ui.access_widget import AccessWidget
 from walksim.ui.analysis_widget import AnalysisWidget
+from walksim.ui.crossing_widget import CrossingWidget
 from walksim.ui.plaza_widget import PlazaWidget
 from walksim.ui.shared_widget import SharedWidget
 from walksim.ui.styles import apply_theme, theme_colors
@@ -198,6 +199,8 @@ class MainWindow(QMainWindow):
 
         self.simulate_action.triggered.connect(self.simulate_example)
 
+        self.crossing_action = QAction("Simular mis datos · Cruce semaforizado", self)
+        self.crossing_action.triggered.connect(lambda: self.crossing_widget.simulate())
         self.shared_action = QAction("Simular mis datos · Sendero compartido", self)
         self.shared_action.triggered.connect(lambda: self.shared_widget.simulate())
         self.plaza_action = QAction("Simular mis datos · Plaza y flujos cruzados", self)
@@ -244,6 +247,7 @@ class MainWindow(QMainWindow):
             ("Accesos y colas · capacidad y espera", 6),
             ("Plaza · flujos cruzados y OD local", 7),
             ("Sendero compartido · PLOS y BLOS", 8),
+            ("Cruce semaforizado · espera y colas", 9),
         ):
             action = analysis_menu.addAction(label)
             action.triggered.connect(lambda _checked, i=index: self.tabs.setCurrentIndex(i))
@@ -252,6 +256,7 @@ class MainWindow(QMainWindow):
         simulation_menu.addAction(self.access_action)
         simulation_menu.addAction(self.plaza_action)
         simulation_menu.addAction(self.shared_action)
+        simulation_menu.addAction(self.crossing_action)
         simulation_menu.addAction(self.simulate_action)
 
         appearance_menu = self.menuBar().addMenu("Apariencia")
@@ -327,6 +332,10 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self._scrollable(self.shared_widget), "Sendero compartido")
         self.shared_widget.busyChanged.connect(self._shared_busy)
         self.shared_widget.set_dark(self.theme == "dark")
+        self.crossing_widget = CrossingWidget()
+        self.tabs.addTab(self._scrollable(self.crossing_widget), "Cruce semaforizado")
+        self.crossing_widget.busyChanged.connect(self._crossing_busy)
+        self.crossing_widget.set_dark(self.theme == "dark")
         root.addWidget(self.tabs, 1)
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
@@ -672,6 +681,7 @@ class MainWindow(QMainWindow):
         self.access_widget.set_dark(mode == "dark")
         self.plaza_widget.set_dark(mode == "dark")
         self.shared_widget.set_dark(mode == "dark")
+        self.crossing_widget.set_dark(mode == "dark")
 
     def resizeEvent(self, event) -> None:  # noqa: N802
         super().resizeEvent(event)
@@ -685,6 +695,7 @@ class MainWindow(QMainWindow):
             self.access_widget.adapt(width)
             self.plaza_widget.adapt(width)
             self.shared_widget.adapt(width)
+            self.crossing_widget.adapt(width)
         compact = width < 900
         self.corridor_splitter.setOrientation(
             Qt.Orientation.Vertical if compact else Qt.Orientation.Horizontal
@@ -730,6 +741,8 @@ class MainWindow(QMainWindow):
         self.access_widget.setEnabled(not busy)
         self.plaza_widget.setEnabled(not busy)
         self.shared_widget.setEnabled(not busy)
+        self.crossing_widget.setEnabled(not busy)
+        self.crossing_action.setEnabled(not busy)
         self.shared_action.setEnabled(not busy)
         self.plaza_action.setEnabled(not busy)
         self.access_action.setEnabled(not busy)
@@ -872,6 +885,7 @@ class MainWindow(QMainWindow):
         self.access_widget.changed.connect(self._mark_dirty)
         self.plaza_widget.changed.connect(self._mark_dirty)
         self.shared_widget.changed.connect(self._mark_dirty)
+        self.crossing_widget.changed.connect(self._mark_dirty)
 
     def _mark_dirty(self, *_args) -> None:
         if not self._loading:
@@ -901,6 +915,7 @@ class MainWindow(QMainWindow):
             self.access_widget.export_state(),
             self.plaza_widget.export_state(),
             self.shared_widget.export_state(),
+            self.crossing_widget.export_state(),
         )
 
     def save_to_path(self, path: str | Path) -> Path:
@@ -987,6 +1002,7 @@ class MainWindow(QMainWindow):
         self.access_widget.restore(state.access)
         self.plaza_widget.restore(state.plaza)
         self.shared_widget.restore(state.shared)
+        self.crossing_widget.restore(state.crossing)
         self.simulation_records = state.simulations
         self.last_output_dir = None
         if self.simulation_records:
@@ -1009,6 +1025,8 @@ class MainWindow(QMainWindow):
         )
         if state.shared and any(c.get("analytical") for c in state.shared["cases"]):
             self.tabs.setCurrentIndex(8)
+        if state.crossing and any(c.get("analytical") for c in state.crossing["cases"]):
+            self.tabs.setCurrentIndex(9)
         self._loading = False
 
     def new_project(self, *_args) -> None:
@@ -1033,6 +1051,7 @@ class MainWindow(QMainWindow):
             and not any(case.get("analytical") for case in self.access_widget.cases)
             and not any(case.get("analytical") for case in self.plaza_widget.cases)
             and not any(case.get("analytical") for case in self.shared_widget.cases)
+            and not any(case.get("analytical") for case in self.crossing_widget.cases)
         ):
             QMessageBox.information(
                 self, "Reporte", "Calcule un análisis o ejecute una simulación."
@@ -1155,6 +1174,11 @@ class MainWindow(QMainWindow):
         self.tabs.setCurrentIndex(2)
         self._mark_dirty()
         panel.simulate()
+
+    def _crossing_busy(self, busy: bool) -> None:
+        self._busy = busy
+        self._set_busy(busy)
+        self.statusBar().showMessage("Simulando cruce…" if busy else "Cruce listo para revisar")
 
     def _shared_busy(self, busy: bool) -> None:
         self._busy = busy

@@ -13,6 +13,7 @@ from typing import Any
 from walksim import __version__
 from walksim.domain.access import validate_study as validate_access_study
 from walksim.domain.analysis import METHODS, calculate
+from walksim.domain.crossing import validate_study as validate_crossing_study
 from walksim.domain.models import CorridorScenario, DirectionResult, ProjectInfo
 from walksim.domain.plaza import validate_study as validate_plaza_study
 from walksim.domain.shared import validate_study as validate_shared_study
@@ -34,11 +35,12 @@ class ProjectState:
     access: dict = field(default_factory=dict)
     plaza: dict = field(default_factory=dict)
     shared: dict = field(default_factory=dict)
+    crossing: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "format": "WalkSim Mobility Project",
-            "schema_version": 6,
+            "schema_version": 7,
             "software_version": __version__,
             **asdict(self),
         }
@@ -81,7 +83,7 @@ def state_from_dict(data: Any) -> ProjectState:
     try:
         if not isinstance(data, dict) or data.get("format") != "WalkSim Mobility Project":
             raise ValueError("El archivo no es un proyecto WalkSim Mobility.")
-        if data.get("schema_version") not in (1, 3, 4, 5, 6):
+        if data.get("schema_version") not in (1, 3, 4, 5, 6, 7):
             raise ValueError("Versión de formato .wksim no compatible.")
         _finite_tree(data)
         project = ProjectInfo(**data["project"])
@@ -180,6 +182,7 @@ def state_from_dict(data: Any) -> ProjectState:
             validate_access_study(data.get("access", {})),
             validate_plaza_study(data.get("plaza", {})),
             validate_shared_study(data.get("shared", {})),
+            validate_crossing_study(data.get("crossing", {})),
         )
     except (KeyError, TypeError, AttributeError, OverflowError) as exc:
         raise ValueError("Estructura del archivo .wksim incompleta o incorrecta.") from exc
@@ -197,12 +200,13 @@ def save_project(state: ProjectState, path: str | Path) -> Path:
     if target.exists():
         try:
             old = json.loads(target.read_text(encoding="utf-8-sig"))
-            if isinstance(old, dict) and old.get("schema_version") in (1, 3, 4, 5):
+            if isinstance(old, dict) and old.get("schema_version") in (1, 3, 4, 5, 6):
                 suffix = {
                     1: ".v2-backup.wksim",
                     3: ".v3.0-backup.wksim",
                     4: ".v3.1-backup.wksim",
                     5: ".v3.2-backup.wksim",
+                    6: ".v3.3-backup.wksim",
                 }[old["schema_version"]]
                 backup = target.with_name(target.stem + suffix)
                 if not backup.exists():

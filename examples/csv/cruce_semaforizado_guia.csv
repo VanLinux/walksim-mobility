@@ -1,0 +1,2 @@
+﻿name,length_m,width_m,ped_ab,ped_ba,speed_mps,cycle_s,walk_s,clearance_s,vehicles_ph,duration_s,seed
+Base · cruce,10.0,4.0,180.0,120.0,1.2,80,18,12,600.0,600,42

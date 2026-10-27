@@ -4,7 +4,20 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
-## Versión 3.3.0 — Fase 5: Senderos compartidos
+## Versión 3.4.0 — Fase 6: Cruce semaforizado
+
+Un cruce peatonal aislado con ciclo fijo, dos aceras y cuatro resultados principales:
+recorrido de referencia L/v, espera media, cola máxima por acera y peatones que
+completaron el cruce. Caso base y una alternativa, CSV guía, guardado `.wksim` y
+reporte `.tex` con analista. Las opciones de simulación se despliegan cuando se necesitan.
+No asigna LOS HCM ni evalúa seguridad vial. La Fase 4 sigue pendiente.
+
+Abra **Análisis → Cruce semaforizado** y use **Simular mis datos**.
+[Ejemplo de comparación](examples/Cruce_Semaforizado_Comparacion.wksim) ·
+[Metodología y guía](docs/CROSSING.md).
+El formato actual es esquema 7: abre versiones anteriores y conserva copia al convertirlas.
+
+### Fase 5: Senderos compartidos, desde 3.3
 
 Nueva pestaña **Sendero compartido**: PLOS y BLOS por sentido, flujos o conteos de
 15 min, PHF, línea central, perfiles de velocidad y bicicletas/peatones dentro de

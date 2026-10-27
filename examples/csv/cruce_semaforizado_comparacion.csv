@@ -1,0 +1,3 @@
+﻿name,length_m,width_m,ped_ab,ped_ba,speed_mps,cycle_s,walk_s,clearance_s,vehicles_ph,duration_s,seed
+Base · verde peatonal 18 s,10,4,180,120,1.2,80,18,12,600,600,42
+Alternativa · verde peatonal 30 s,10,4,180,120,1.2,80,30,12,600,600,42
