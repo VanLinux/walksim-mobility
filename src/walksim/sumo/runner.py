@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import shutil
-import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from walksim.domain.models import CorridorScenario, SimulationResult
 from walksim.sumo.generator import ScenarioFiles, build_corridor_files
 from walksim.sumo.parser import corridor_measurements, parse_personinfo
+from walksim.sumo.runtime import engine_version, find_sumo_tool, run_native
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,20 +35,13 @@ class SumoExecutionError(RuntimeError):
 
 def detect_sumo() -> SumoInstallation:
     return SumoInstallation(
-        sumo=shutil.which("sumo"),
-        netconvert=shutil.which("netconvert"),
+        sumo=find_sumo_tool("sumo"),
+        netconvert=find_sumo_tool("netconvert"),
     )
 
 
 def _run_command(command: list[str], cwd: Path, label: str) -> None:
-    completed = subprocess.run(
-        command,
-        cwd=cwd,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=180,
-    )
+    completed = run_native(command, cwd=cwd, timeout=180)
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip() or "Sin detalle."
         raise SumoExecutionError(f"{label} terminó con error:\n{detail}")
@@ -111,15 +103,9 @@ def run_corridor_simulation(
     if not files.personinfo.exists():
         raise SumoExecutionError("SUMO finalizó sin generar personinfo.xml.")
 
-    version = subprocess.run(
-        [str(installation.sumo), "--version"],
-        capture_output=True,
-        text=True,
-        timeout=10,
-        check=False,
-    ).stdout.splitlines()
+    version = engine_version(str(installation.sumo))
     return SimulationRun(
-        engine_version=version[0] if version else "No registrada",
+        engine_version=version,
         measurements=corridor_measurements(
             files.personinfo, scenario.length_m, scenario.width_m, scenario.analysis_time_s
         ),

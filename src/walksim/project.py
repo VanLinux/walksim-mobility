@@ -53,6 +53,7 @@ def atomic_write(path: str | Path, text: str) -> None:
         with tempfile.NamedTemporaryFile(
             mode="w",
             encoding="utf-8",
+            newline="",
             dir=target.parent,
             prefix="." + target.name,
             suffix=".tmp",

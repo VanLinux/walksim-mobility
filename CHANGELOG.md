@@ -1,5 +1,15 @@
 # Historial de cambios
 
+## Instalador Windows de 3.4.2
+
+- Instalador x64 para Windows 11 con Python, Qt/PySide6, gráficas, fuentes, ejemplos y SUMO 1.28.0 incluidos.
+- Motor privado junto al ejecutable, sin depender de SUMO, Python ni PATH externos.
+- Procesos nativos aislados de las DLL de Qt/Python y esquemas locales para rutas con acentos.
+- Exportación CSV sin duplicar saltos de línea en Windows; las plantillas y matrices se pueden volver a importar.
+- Accesos en escritorio e Inicio, desinstalador, fuentes y avisos de licencia.
+- Construcción y comprobación automatizadas en Windows: interfaz, seis microsimulaciones, .wksim, reportes .tex y figuras PDF, sin compilador LaTeX.
+- Los métodos de cálculo y el esquema de los proyectos mantienen la versión 3.4.2.
+
 ## 3.4.2 — Navegación y presentación
 
 - Resumen breve de cálculos y resultados en todas las ventanas desde Walkway.

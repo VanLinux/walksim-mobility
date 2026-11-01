@@ -1,0 +1,23 @@
+Componentes distribuidos con WalkSim Mobility
+
+WalkSim Mobility: GPL-3.0-only.
+La carpeta sources contiene el código exacto usado para construir la aplicación.
+
+Python: licencia PSF; ver licenses/Python-LICENSE.txt.
+PySide6/Qt: licencias LGPL/GPL o comerciales según los componentes.
+Matplotlib, NumPy, Pillow, tzdata y dependencias:
+ver sus licencias e inventario en licenses/components.json y licenses/.
+
+Eclipse SUMO 1.28.0: distribución oficial de Windows x64 de DLR/Eclipse.
+El motor se conserva con sus DLL, datos, licencias y avisos originales.
+Fuente y documentación:
+https://github.com/eclipse-sumo/sumo/tree/v1_28_0
+https://sumo.dlr.de/releases/1.28.0/sumo-src-1.28.0.tar.gz
+https://eclipse.dev/sumo/
+Paquete usado:
+https://sumo.dlr.de/releases/1.28.0/sumo-win64-1.28.0.zip
+SHA256: 822aa9c57a07a895200d536fd2b3fe8785e36baa9b97ecbe75688e08a636fb8e
+
+Las licencias de los componentes se conservan por separado; este aviso no las
+sustituye. Las fuentes Latin Modern conservan sus avisos GUST/LPPL en assets.
+

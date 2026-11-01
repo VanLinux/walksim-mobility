@@ -1,5 +1,15 @@
 # WalkSim Mobility
 
+## Windows 11: instalador completo
+
+Descargue el archivo **WalkSim-Mobility-3.4.2-Windows-x64-Setup.exe** desde
+[las publicaciones de Windows](https://github.com/VanLinux/walksim-mobility/releases/tag/windows-v3.4.2).
+Incluye Python, las bibliotecas y Eclipse SUMO. Basta con ejecutar el instalador
+y abrir el acceso directo; no requiere instalaciones adicionales ni cambios en PATH.
+Los reportes .tex y sus figuras pueden compilarse en Overleaf.
+[Detalles de construcción y comprobación](docs/WINDOWS_INSTALLER.md).
+
+
 **WalkSim Mobility** es una herramienta ligera para la simulación y el análisis de movilidad peatonal. Su objetivo es permitir que el usuario describa un problema mediante parámetros de ingeniería sencillos mientras **Eclipse SUMO** funciona como motor de microsimulación en segundo plano.
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
