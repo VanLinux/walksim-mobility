@@ -20,9 +20,8 @@ capacidades sustentadas para la instalación estudiada.
     las capacidades de todos; cada microsimulación se ejecuta en su escenario seleccionado.
 11. Guarde `.wksim`. Exporte comparación, series CSV o gráficas. Archivo exporta el reporte `.tex`.
 
-**Simulación → Simular mis datos · Accesos y colas** ejecuta el caso seleccionado.
-La acción **Simular ejemplo** conserva su función de crear un corredor Walkway de ejemplo.
-F5 ejecuta el caso seleccionado de Walkway, según su etiqueta en el menú.
+**Simular mis datos**, dentro del módulo, ejecuta el caso seleccionado.
+**Simulación → Simular ejemplo** añade y ejecuta un ejemplo de accesos y colas.
 
 ## Patrones
 
@@ -159,3 +158,7 @@ Las capacidades de escaleras y dispositivos requieren fuentes o mediciones propi
 
 Desde WalkSim 3.3 los proyectos nuevos usan esquema 6 para incluir Senderos compartidos;
 se mantiene la lectura de los esquemas de esta guía.
+
+### Reporte de esta ventana (3.4.1)
+
+Abra esta pestaña y use Archivo → Exportar reporte .tex. Solo se incluyen los casos con resultados actuales de este módulo, su método, entradas, procedencia y gráficas. Los resultados obsoletos se excluyen. El nombre del analista se conserva en Proyecto; guardar .wksim sigue guardando todos los módulos.

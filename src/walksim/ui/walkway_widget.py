@@ -106,6 +106,8 @@ class StableCanvas(FigureCanvasQTAgg):
 
 
 class WalkwayWidget(QWidget):
+    case_factory = staticmethod(new_case)
+
     changed = Signal()
     busyChanged = Signal(bool)
 

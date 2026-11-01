@@ -4,7 +4,7 @@ La Fase 6 responde una pregunta concreta: **¿cuánto esperan los peatones, cuá
 
 ## Uso
 
-1. Abra **Análisis → Cruce semaforizado**.
+1. Abra la pestaña **Cruce semaforizado**.
 2. Capture longitud entre aceras y ancho del paso en metros, demanda por sentido en peat/h y velocidad peatonal en m/s. A es la acera superior del esquema; B la inferior.
 3. Indique ciclo, verde para iniciar y despeje peatonal, todos en segundos enteros. El programa obtiene el verde vehicular como `C − verde peatonal − despeje − 3`; debe quedar al menos 5 s. Los 3 s corresponden al amarillo vehicular supuesto de la plantilla.
 4. Capture el flujo vehicular total en veh/h. Se divide por igual entre los dos sentidos. Puede ser cero.
@@ -70,3 +70,7 @@ Fuentes primarias de implementación:
 Fuera de alcance: intersección completa, giros, cruce sin semáforo, optimización de señales, diseño normativo, calibración automática, LOS formal, mapas de calor y evaluación de seguridad. Las condiciones locales deben contrastarse con observación de campo antes de usar resultados para decisiones de proyecto.
 
 Para mantener una ejecución ligera se limita demanda esperada a 3000 usuarios y dos millones de usuario·s potenciales; la realización no puede superar 5000 usuarios. Son límites de rendimiento del software, no capacidades peatonales o vehiculares.
+
+### Reporte de esta ventana (3.4.1)
+
+Abra esta pestaña y use Archivo → Exportar reporte .tex. Solo se incluyen los casos con resultados actuales de este módulo, su método, entradas, procedencia y gráficas. Los resultados obsoletos se excluyen. El nombre del analista se conserva en Proyecto; guardar .wksim sigue guardando todos los módulos.

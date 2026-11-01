@@ -46,7 +46,9 @@ from walksim.csv_io import write_template
 from walksim.domain.models import CorridorScenario, DirectionResult, ProjectInfo, SimulationResult
 from walksim.project import ProjectState, load_project, save_project
 from walksim.report import write_report
+from walksim.report_scope import SCOPE_TITLES, select_report_state
 from walksim.sumo.runner import run_corridor_simulation
+from walksim.ui.about_dialog import AboutDialog
 from walksim.ui.access_widget import AccessWidget
 from walksim.ui.analysis_widget import AnalysisWidget
 from walksim.ui.crossing_widget import CrossingWidget
@@ -175,6 +177,7 @@ class MainWindow(QMainWindow):
         self._loading = False
         self._set_clean()
         self.tabs.setCurrentIndex(2)
+        self._update_context_actions()
 
     def _create_actions(self) -> None:
         self.new_action = QAction("Nuevo estudio", self)
@@ -199,22 +202,11 @@ class MainWindow(QMainWindow):
 
         self.simulate_action.triggered.connect(self.simulate_example)
 
-        self.crossing_action = QAction("Simular mis datos · Cruce semaforizado", self)
-        self.crossing_action.triggered.connect(lambda: self.crossing_widget.simulate())
-        self.shared_action = QAction("Simular mis datos · Sendero compartido", self)
-        self.shared_action.triggered.connect(lambda: self.shared_widget.simulate())
-        self.plaza_action = QAction("Simular mis datos · Plaza y flujos cruzados", self)
-        self.plaza_action.triggered.connect(lambda: self.plaza_widget.simulate())
-        self.access_action = QAction("Simular mis datos · Accesos y colas", self)
-        self.access_action.triggered.connect(lambda: self.access_widget.simulate())
-        self.execute_action = QAction("Simular mis datos · Walkway", self)
-        self.execute_action.setShortcut("F5")
-        self.execute_action.triggered.connect(lambda: self.walkway_widget.simulate())
         self.manual_action = QAction("Guía de uso", self)
         self.manual_action.triggered.connect(self.show_guide)
         self.method_action = QAction("Metodología Walkway", self)
         self.method_action.triggered.connect(lambda: self.show_guide(methodology=True))
-        self.about_action = QAction("Acerca de WalkSim Mobility", self)
+        self.about_action = QAction("Acerca de…", self)
         self.about_action.triggered.connect(self.show_about)
 
         self.theme_actions = QActionGroup(self)
@@ -239,24 +231,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.report_action)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_action)
-        analysis_menu = self.menuBar().addMenu("Análisis")
-        for label, index in (
-            ("Walkway · operación y diseño", 2),
-            ("Análisis complementarios", 3),
-            ("Corredor libre", 4),
-            ("Accesos y colas · capacidad y espera", 6),
-            ("Plaza · flujos cruzados y OD local", 7),
-            ("Sendero compartido · PLOS y BLOS", 8),
-            ("Cruce semaforizado · espera y colas", 9),
-        ):
-            action = analysis_menu.addAction(label)
-            action.triggered.connect(lambda _checked, i=index: self.tabs.setCurrentIndex(i))
         simulation_menu = self.menuBar().addMenu("Simulación")
-        simulation_menu.addAction(self.execute_action)
-        simulation_menu.addAction(self.access_action)
-        simulation_menu.addAction(self.plaza_action)
-        simulation_menu.addAction(self.shared_action)
-        simulation_menu.addAction(self.crossing_action)
         simulation_menu.addAction(self.simulate_action)
 
         appearance_menu = self.menuBar().addMenu("Apariencia")
@@ -336,6 +311,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self._scrollable(self.crossing_widget), "Cruce semaforizado")
         self.crossing_widget.busyChanged.connect(self._crossing_busy)
         self.crossing_widget.set_dark(self.theme == "dark")
+        self.tabs.currentChanged.connect(self._update_context_actions)
         root.addWidget(self.tabs, 1)
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
@@ -716,7 +692,9 @@ class MainWindow(QMainWindow):
             self.cards_layout.setColumnStretch(column, 1)
 
     def simulate(self) -> None:
-        scenario = self._scenario_from_ui()
+        self._start_corridor_simulation(self._scenario_from_ui())
+
+    def _start_corridor_simulation(self, scenario, *, example=False) -> None:
         errors = scenario.validate()
 
         if errors:
@@ -729,6 +707,7 @@ class MainWindow(QMainWindow):
         self._set_busy(True)
         self.statusBar().showMessage("Simulando corredor… Puede guardar el estudio al terminar.")
         self.worker = SimulationWorker(scenario, self)
+        self.worker.example = example
         self.worker.succeeded.connect(self._simulation_completed)
         self.worker.failed.connect(self._simulation_failed)
         self.worker.finished.connect(self._simulation_finished)
@@ -742,21 +721,15 @@ class MainWindow(QMainWindow):
         self.plaza_widget.setEnabled(not busy)
         self.shared_widget.setEnabled(not busy)
         self.crossing_widget.setEnabled(not busy)
-        self.crossing_action.setEnabled(not busy)
-        self.shared_action.setEnabled(not busy)
-        self.plaza_action.setEnabled(not busy)
-        self.access_action.setEnabled(not busy)
-        self.execute_action.setEnabled(not busy)
-        self.simulate_action.setEnabled(not busy)
         self.rerun_button.setEnabled(not busy)
         for action in (
             self.new_action,
             self.open_action,
             self.save_action,
             self.save_as_action,
-            self.report_action,
         ):
             action.setEnabled(not busy)
+        self._update_context_actions()
 
     def _simulation_failed(self, _detail: str) -> None:
         QMessageBox.critical(
@@ -792,6 +765,8 @@ class MainWindow(QMainWindow):
                 "El tiempo perdido simulado no es la demora de control de un cruce.",
             ],
         }
+        if getattr(self.worker, "example", False):
+            record["name"] = "Ejemplo · Corredor libre"
         self.simulation_records.append(record)
         self._show_simulation(record)
         self._mark_dirty()
@@ -822,10 +797,11 @@ class MainWindow(QMainWindow):
         self._set_result_row(1, "B → A", result.ba)
         self._set_result_row(2, "Total", result.total)
 
-        self.result_status.setText(f"Simulación completada · semilla {scenario.seed}")
+        label = record.get("name", "Simulación completada")
+        self.result_status.setText(f"{label} · semilla {scenario.seed}")
         self.output_label.setText(
             "Resultado conservado del escenario ejecutado. "
-            "El reporte incluye el historial de microsimulaciones."
+            "Archivo → Exportar reporte .tex incluye esta ejecución."
         )
         from html import escape
 
@@ -839,7 +815,7 @@ class MainWindow(QMainWindow):
             "<table cellpadding='5'>"
             + rows
             + "</table><p>"
-            + escape(record.get("assumptions", [""])[0])
+            + escape((record.get("assumptions") or [""])[0])
             + "</p><p>"
             + escape(
                 "El LOS por espacio global es indicativo; no evalúa densidades locales máximas."
@@ -1036,7 +1012,52 @@ class MainWindow(QMainWindow):
         self.current_file = None
         self._set_clean()
 
+    def _active_scope(self):
+        return {
+            2: "walkway",
+            3: "analyses",
+            4: "corridor",
+            5: "corridor",
+            6: "access",
+            7: "plaza",
+            8: "shared",
+            9: "crossing",
+        }.get(self.tabs.currentIndex())
+
+    def _update_context_actions(self, *_args):
+        scope = self._active_scope()
+        label = SCOPE_TITLES.get(scope, "")
+        self.report_action.setEnabled(bool(scope) and not self._busy)
+        self.report_action.setToolTip(
+            "Exportar únicamente los resultados de " + label
+            if scope
+            else "Seleccione una ventana de trabajo para exportar su reporte."
+        )
+        self.simulate_action.setEnabled(bool(scope) and scope != "analyses" and not self._busy)
+        self.simulate_action.setToolTip(
+            "Añadir y simular un ejemplo de " + label
+            if scope and scope != "analyses"
+            else "Los análisis complementarios se resuelven con el botón Calcular."
+            if scope == "analyses"
+            else "Seleccione una ventana con microsimulación."
+        )
+
+    def _active_report_state(self):
+        state = self.collect_project()
+        if self.tabs.currentIndex() == 4:
+            # No exportar una simulación antigua como si correspondiera al formulario actual.
+            current = asdict(self._scenario_from_ui())
+            state.simulations = [r for r in state.simulations if r["scenario"] == current]
+        return select_report_state(state, self._active_scope())
+
     def export_report(self, *_args) -> None:
+        if self._busy:
+            return
+        try:
+            state = self._active_report_state()
+        except ValueError as exc:
+            QMessageBox.information(self, "Reporte de la ventana activa", str(exc))
+            return
         if not self.project_analyst.text().strip():
             analyst, accepted = QInputDialog.getText(
                 self, "Analista del estudio", "Nombre del analista:"
@@ -1044,28 +1065,20 @@ class MainWindow(QMainWindow):
             if not accepted or not analyst.strip():
                 return
             self.project_analyst.setText(analyst.strip())
-        if (
-            not self.analysis_widget.results
-            and not self.simulation_records
-            and not any(case.get("analytical") for case in self.walkway_widget.cases)
-            and not any(case.get("analytical") for case in self.access_widget.cases)
-            and not any(case.get("analytical") for case in self.plaza_widget.cases)
-            and not any(case.get("analytical") for case in self.shared_widget.cases)
-            and not any(case.get("analytical") for case in self.crossing_widget.cases)
-        ):
-            QMessageBox.information(
-                self, "Reporte", "Calcule un análisis o ejecute una simulación."
-            )
-            return
+            state.project.analyst = analyst.strip()
+        scope = self._active_scope()
         path, _ = QFileDialog.getSaveFileName(
-            self, "Exportar informe completo", "informe_walksim.tex", "LaTeX (*.tex)"
+            self,
+            "Exportar reporte · " + SCOPE_TITLES[scope],
+            "informe_" + scope + ".tex",
+            "LaTeX (*.tex)",
         )
         if path:
             try:
                 write_report(
-                    self.collect_project(), path if path.lower().endswith(".tex") else path + ".tex"
+                    state, path if path.lower().endswith(".tex") else path + ".tex", scope=scope
                 )
-                self.statusBar().showMessage("Reporte LaTeX exportado")
+                self.statusBar().showMessage("Reporte LaTeX exportado · " + SCOPE_TITLES[scope])
             except (ValueError, OSError) as exc:
                 QMessageBox.warning(self, "No fue posible exportar", str(exc))
 
@@ -1158,20 +1171,50 @@ class MainWindow(QMainWindow):
             event.ignore()
 
     def simulate_example(self, *_args) -> None:
-        from walksim.domain.walkway import new_case
-
-        panel = self.walkway_widget
         if self._busy:
             return
-        if len(panel.cases) >= 30:
-            QMessageBox.information(self, "Escenarios", "El estudio admite máximo 30 escenarios.")
+        scope = self._active_scope()
+        if scope == "corridor":
+            self._start_corridor_simulation(
+                CorridorScenario(analysis_time_s=120, flow_ab_pph=180, flow_ba_pph=120),
+                example=True,
+            )
             return
-        example = new_case("Ejemplo de corredor")
+        panels = {
+            "walkway": self.walkway_widget,
+            "access": self.access_widget,
+            "plaza": self.plaza_widget,
+            "shared": self.shared_widget,
+            "crossing": self.crossing_widget,
+        }
+        panel = panels.get(scope)
+        if panel is None:
+            QMessageBox.information(
+                self,
+                "Simular ejemplo",
+                "Seleccione una ventana con microsimulación. "
+                "En Complementarios use Calcular para resolver el análisis.",
+            )
+            return
+        limit = 2 if scope == "crossing" else 30
+        if len(panel.cases) >= limit:
+            QMessageBox.information(
+                self,
+                "Escenarios",
+                f"Esta ventana admite {limit} escenarios. Guarde sus avances y libere un "
+                "espacio o cree un estudio nuevo para añadir el ejemplo.",
+            )
+            return
+        # Datos ilustrativos propios de cada módulo; nunca se reemplaza el caso del usuario.
+        inputs = {"duration_s": 120}
+        if scope == "plaza":
+            inputs["warmup_s"] = 0
+        example = panel.case_factory("Ejemplo · " + SCOPE_TITLES[scope])
+        example["inputs"].update(inputs)
         panel.cases.append(example)
         panel.selected_id = example["id"]
         panel._refresh_selector()
         panel._load_current()
-        self.tabs.setCurrentIndex(2)
         self._mark_dirty()
         panel.simulate()
 
@@ -1280,11 +1323,8 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def show_about(self) -> None:
-        QMessageBox.about(
-            self,
-            "Acerca de WalkSim Mobility",
-            f"<b>WalkSim Mobility {__version__}</b><br><br>"
-            "Simulación y análisis de movilidad peatonal.<br><br>"
-            "Desarrollador: Héctor Alonso Benítez García<br>"
-            "Licencia: GNU GPL v3.0",
-        )
+        dialog = AboutDialog(self)
+        try:
+            dialog.exec()
+        finally:
+            dialog.deleteLater()

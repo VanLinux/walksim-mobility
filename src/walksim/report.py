@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from walksim import __version__
 from walksim.domain.analysis import METHODS
 from walksim.project import ProjectState, atomic_write
+from walksim.report_scope import SCOPE_TITLES, select_report_state
 
 _ESCAPES = {
     "\\": r"\textbackslash{}",
@@ -65,6 +66,8 @@ def _table(rows: list[tuple[object, object]]) -> str:
 
 
 def _items(items: list[str]) -> str:
+    if not items:
+        return ""
     return (
         "\\begin{itemize}\n"
         + "\n".join("\\item " + tex_escape(s) for s in items)
@@ -72,17 +75,31 @@ def _items(items: list[str]) -> str:
     )
 
 
-def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> str:
+def build_report(
+    state: ProjectState, assets: dict[str, str] | None = None, *, scope: str | None = None
+) -> str:
+    if scope is not None:
+        state = select_report_state(state, scope)
     if not state.project.analyst.strip():
         raise ValueError("Indique el nombre del analista en la pestaña Proyecto antes de exportar.")
     if (
         not state.analyses
         and not state.simulations
-        and not any(c.get("analytical") for c in state.walkway.get("cases", []))
-        and not any(c.get("analytical") for c in state.access.get("cases", []))
-        and not any(c.get("analytical") for c in state.plaza.get("cases", []))
-        and not any(c.get("analytical") for c in state.shared.get("cases", []))
-        and not any(c.get("analytical") for c in state.crossing.get("cases", []))
+        and not any(
+            c.get("analytical") or c.get("simulation") for c in state.walkway.get("cases", [])
+        )
+        and not any(
+            c.get("analytical") or c.get("simulation") for c in state.access.get("cases", [])
+        )
+        and not any(
+            c.get("analytical") or c.get("simulation") for c in state.plaza.get("cases", [])
+        )
+        and not any(
+            c.get("analytical") or c.get("simulation") for c in state.shared.get("cases", [])
+        )
+        and not any(
+            c.get("analytical") or c.get("simulation") for c in state.crossing.get("cases", [])
+        )
     ):
         raise ValueError("Realice al menos un análisis o una simulación antes de exportar.")
     from walksim.domain.access import fresh as access_fresh
@@ -125,6 +142,7 @@ def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> s
 {\Huge\bfseries\color{ink} WalkSim Mobility}\par
 {\Large Informe técnico de análisis peatonal}\par
 """,
+        ("\\textbf{" + tex_escape(SCOPE_TITLES[scope]) + "}\\par" if scope else ""),
         tex_escape(f"Versión {__version__} · Generado el {stamp} (Ciudad de México)") + "\n",
         r"\end{center}",
         "\n\\section{Identificación del estudio}\n",
@@ -139,14 +157,18 @@ def build_report(state: ProjectState, assets: dict[str, str] | None = None) -> s
         ),
         "\\textbf{Notas del analista:} " + tex_escape(state.project.notes or "Sin notas.") + "\n",
         r"""\section{Objeto, alcance y unidades}
-Este informe contiene los casos calculados y las microsimulaciones ejecutadas del estudio.
+Este informe contiene los casos calculados y las microsimulaciones ejecutadas
+dentro del alcance indicado. Cada ventana de trabajo se exporta por separado desde Archivo.
 Cada caso conserva sus propias entradas y fecha de ejecución. Los borradores no calculados
 se guardan en el proyecto \texttt{.wksim}, pero no se presentan como resultados.
 Se emplean metros, segundos, minutos, peatones y vehículos. Las conversiones son
 $1\,\mathrm{ft}=0.3048\,\mathrm{m}$ y
 $1\,\mathrm{ft}^2=0.09290304\,\mathrm{m}^2$.
 
-\section{Fundamentos y criterios}
+""",
+        *(
+            [
+                r"""\section{Fundamentos y criterios}
 La densidad es $D=N/A$, el espacio es $M=1/D$ y el flujo específico satisface
 $q=60 S D$ cuando $S$ se expresa en m/s y $q$ en peat/min/m.
 El ancho útil descuenta obstáculos y franjas de borde, sin duplicar sus áreas de influencia.
@@ -167,7 +189,11 @@ aportado. Esta categoría no representa el procedimiento completo de PLOS de int
 Para cruces sin semáforo se calcula demora por aceptación de brechas de un peatón individual,
 en una etapa, sin cesión vehicular. No se asigna un PLOS a partir de esa demora.
 Los valores no sustituyen una evaluación de seguridad vial, accesibilidad o evacuación.
-""",
+"""
+            ]
+            if scope in (None, "analyses")
+            else []
+        ),
     ]
     from walksim.walkway_report import sections
 
@@ -253,7 +279,7 @@ escaleras ni semáforos. No se atribuye una simulación de esos elementos a los 
         ]
     for index, run in enumerate(state.simulations, 1):
         parts += [
-            "\\subsection{" + tex_escape(f"Microsimulación {index}") + "}\n",
+            "\\subsection{" + tex_escape(run.get("name", f"Microsimulación {index}")) + "}\n",
             _table(
                 [
                     ("Fecha (UTC)", run["created_at"]),
@@ -323,7 +349,11 @@ Los criterios se han contrastado con el manual y las fuentes específicas de cad
     return "\n".join(parts)
 
 
-def write_report(state: ProjectState, path: str) -> None:
+def write_report(state: ProjectState, path: str, *, scope: str | None = None) -> None:
+    if scope is not None:
+        state = select_report_state(state, scope)
+    # Validar antes de crear carpetas o figuras de una exportación incompleta.
+    build_report(state, scope=scope)
     from pathlib import Path
 
     from matplotlib.backends.backend_agg import FigureCanvasAgg
@@ -420,4 +450,4 @@ def write_report(state: ProjectState, path: str) -> None:
         figure.savefig(folder / name, format="pdf", bbox_inches="tight")
         figure.clear()
         assets["crossing:" + case["id"]] = (Path(folder.name) / name).as_posix()
-    atomic_write(target, build_report(state, assets))
+    atomic_write(target, build_report(state, assets, scope=scope))

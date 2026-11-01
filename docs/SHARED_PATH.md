@@ -22,8 +22,9 @@ del proyecto. Los métodos de escaleras ya existentes siguen en sus módulos ant
 10. Exporte comparación, grupos, series o gráficas. Guarde `.wksim` y exporte `.tex`
     desde Archivo; conserve la carpeta de figuras junto al informe.
 
-La acción del menú **Simular mis datos · Sendero compartido** ejecuta el caso actual.
-F5 mantiene la acción Walkway. **Simular ejemplo** añade un corredor Walkway de muestra.
+El botón **Simular mis datos** dentro de esta pestaña ejecuta el caso actual.
+**Simulación → Simular ejemplo** añade y simula un sendero compartido de muestra.
+Los botones de esta pestaña calculan y simulan los datos del usuario.
 
 ## Demanda y unidades
 
@@ -229,3 +230,7 @@ condiciones del sitio y una revisión de la metodología de diseño que se adopt
 - [SUMO Pedestrians](https://sumo.dlr.de/docs/Simulation/Pedestrians.html).
 - [SUMO Sublane](https://sumo.dlr.de/docs/Simulation/SublaneModel.html).
 - [SUMO Opposite Direction Driving](https://sumo.dlr.de/docs/Simulation/OppositeDirectionDriving.html).
+
+### Reporte de esta ventana (3.4.1)
+
+Abra esta pestaña y use Archivo → Exportar reporte .tex. Solo se incluyen los casos con resultados actuales de este módulo, su método, entradas, procedencia y gráficas. Los resultados obsoletos se excluyen. El nombre del analista se conserva en Proyecto; guardar .wksim sigue guardando todos los módulos.

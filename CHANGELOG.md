@@ -1,5 +1,17 @@
 # Historial de cambios
 
+## 3.4.1 — Correcciones de menús y reportes
+
+- Archivo exporta el reporte LaTeX de la ventana activa, con los resultados actuales y las figuras de ese módulo, sin mezclar estudios de otras pestañas.
+- Corredor libre exige una ejecución de sus parámetros actuales; Resultados del corredor exporta la ejecución mostrada.
+- Se elimina el menú Análisis. Los botones de cálculo permanecen en cada espacio de trabajo.
+- Simulación conserva únicamente Simular ejemplo, con datos propios del módulo activo y sin sobrescribir los casos del usuario.
+- Tipografía Latin Modern Roman distribuida con licencias GUST/LPPL, igual a MacroNet, manteniendo controles y temas neutros adaptables.
+- Acerca de y Contacto siguen la presentación de MacroNet Transport: versión, descripción, autor, GPL-3.0-only y correo para sugerencias o problemas.
+- Contacto abre la aplicación de correo o copia la dirección; no envía mensajes automáticamente.
+- Se mantienen el esquema .wksim y las metodologías existentes.
+
+
 ## 3.4.0 — Fase 6: cruce semaforizado
 
 - Un cruce peatonal aislado con ciclo fijo y fases separadas para vehículos, inicio peatonal y despeje.

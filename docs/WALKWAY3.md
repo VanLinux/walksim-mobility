@@ -22,7 +22,7 @@ son fases posteriores: no se presentan como implementados.
    conserva los datos, pero debe calcularse y simularse por separado.
 6. En **Comparar**, calcule todas las alternativas y exporte la tabla a CSV.
 7. Despliegue **Opciones de microsimulación** y pulse **Ejecutar microsimulación**
-   (también Simulación → Simular mis datos · Walkway, F5).
+   desde los botones de esta pestaña.
 8. Revise la comparación, gráficas y procedencia de datos. Puede exportar las
    gráficas a PNG/PDF y las series a CSV.
 9. En **Archivo**, guarde `.wksim` o exporte el informe `.tex` con el analista.
@@ -228,3 +228,7 @@ real de SUMO con semilla y versión registradas. No son observaciones de campo.
 
 Desde WalkSim 3.3 los proyectos nuevos usan esquema 6 para incluir Senderos compartidos;
 se mantiene la lectura de los esquemas de esta guía.
+
+### Reporte de esta ventana (3.4.1)
+
+Abra esta pestaña y use Archivo → Exportar reporte .tex. Solo se incluyen los casos con resultados actuales de este módulo, su método, entradas, procedencia y gráficas. Los resultados obsoletos se excluyen. El nombre del analista se conserva en Proyecto; guardar .wksim sigue guardando todos los módulos.

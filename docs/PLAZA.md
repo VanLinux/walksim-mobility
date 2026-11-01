@@ -18,9 +18,9 @@ incluidos son sintéticos. El analista debe sustituirlos por datos del sitio.
 10. Compare resultados o exporte comparación, OD, celdas y series CSV; guarde mapas PNG/PDF.
 11. Guarde el proyecto `.wksim` y exporte el reporte `.tex` desde Archivo.
 
-Simulación → **Simular mis datos · Plaza y flujos cruzados** ejecuta este módulo.
-F5 conserva su acción Walkway. **Simular ejemplo** añade un corredor Walkway de
-muestra; no ejecuta los datos de Plaza.
+**Simular mis datos**, dentro de esta pestaña, ejecuta su caso.
+**Simulación → Simular ejemplo** añade y ejecuta una plaza con datos de muestra;
+no reemplaza ni ejecuta los datos introducidos en su caso.
 
 ## Plantillas y accesos
 
@@ -174,3 +174,7 @@ casos ya ejecutados.
 
 Desde WalkSim 3.3 los proyectos nuevos usan esquema 6 para incluir Senderos compartidos;
 se mantiene la lectura de los esquemas de esta guía.
+
+### Reporte de esta ventana (3.4.1)
+
+Abra esta pestaña y use Archivo → Exportar reporte .tex. Solo se incluyen los casos con resultados actuales de este módulo, su método, entradas, procedencia y gráficas. Los resultados obsoletos se excluyen. El nombre del analista se conserva en Proyecto; guardar .wksim sigue guardando todos los módulos.

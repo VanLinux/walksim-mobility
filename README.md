@@ -4,6 +4,15 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
+## Versión 3.4.1 — Trabajo y reportes por pestaña
+
+- Archivo → Exportar reporte .tex genera únicamente resultados actuales de la pestaña activa, con identificación y analista. En un módulo se incluyen sus alternativas calculadas; Resultados del corredor exporta la ejecución mostrada. Inicio y Proyecto no exportan resultados.
+- Se elimina el menú Análisis. Los cálculos y la ejecución de sus datos se realizan con los botones de cada módulo.
+- Simulación contiene únicamente **Simular ejemplo**: añade y ejecuta datos ilustrativos del módulo activo, sin reemplazar sus casos. Inicio, Proyecto y Complementarios no tienen microsimulación de ejemplo. El corredor conserva el formulario del usuario y muestra el ejemplo en Resultados del corredor.
+- Se distribuye la misma tipografía Latin Modern Roman de MacroNet, con sus licencias, para mantener una presentación consistente sin requerir TeX instalado.
+- Ayuda → Acerca de… muestra versión, autor, licencia y **Contacto**, con correo seleccionable, apertura de la aplicación de correo y botón para copiar la dirección. Mantiene la presentación neutral de MacroNet Transport.
+- El guardado .wksim sigue conservando el estudio completo. No cambia el esquema del archivo ni las metodologías.
+
 ## Versión 3.4.0 — Fase 6: Cruce semaforizado
 
 Un cruce peatonal aislado con ciclo fijo, dos aceras y cuatro resultados principales:
@@ -12,7 +21,7 @@ completaron el cruce. Caso base y una alternativa, CSV guía, guardado `.wksim` 
 reporte `.tex` con analista. Las opciones de simulación se despliegan cuando se necesitan.
 No asigna LOS HCM ni evalúa seguridad vial. La Fase 4 sigue pendiente.
 
-Abra **Análisis → Cruce semaforizado** y use **Simular mis datos**.
+Abra la pestaña **Cruce semaforizado** y use **Simular mis datos**.
 [Ejemplo de comparación](examples/Cruce_Semaforizado_Comparacion.wksim) ·
 [Metodología y guía](docs/CROSSING.md).
 El formato actual es esquema 7: abre versiones anteriores y conserva copia al convertirlas.
@@ -63,9 +72,9 @@ falta de espacio. Consulte [la guía completa y los límites](docs/ACCESS_QUEUE.
 
 Abra [la comparación de dos y cuatro torniquetes](examples/AccessQueue_Metro_Comparacion.wksim)
 o importe una plantilla `examples/csv/access_*.csv`. **Simular mis datos** ejecuta
-el caso seleccionado; **Simular ejemplo** añade un corredor de muestra independiente.
+el caso seleccionado; **Simular ejemplo** añade datos de muestra del módulo activo.
 Guarda proyectos 3.1 y lee los de 2.1/3.0, conservando copia al convertir el original.
-El reporte `.tex` incluye entradas, método, resultados y gráficas de ambos módulos.
+El reporte `.tex` incluye entradas, método, resultados y gráficas de la pestaña activa.
 
 ### Walkway, disponible desde 3.0
 

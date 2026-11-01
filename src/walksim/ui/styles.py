@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
-from PySide6.QtGui import QColor, QPalette
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QPalette
 from PySide6.QtWidgets import QApplication
 
 
@@ -37,7 +38,7 @@ QMainWindow, QDialog {
 }
 QWidget {
     color: #202124;
-    font-family: "Inter", "Noto Sans", "DejaVu Sans", sans-serif;
+    font-family: "Latin Modern Roman", "DejaVu Serif", serif;
     font-size: 10pt;
 }
 QMenuBar {
@@ -200,7 +201,22 @@ QLabel#metricValue {
 """
 
 
+def install_font(app: QApplication) -> None:
+    """La misma familia distribuida con MacroNet, también disponible sin TeX instalado."""
+    if app.property("walksim_font_installed"):
+        return
+    folder = Path(__file__).resolve().parents[1] / "assets" / "fonts"
+    for path in sorted(folder.glob("*.otf")):
+        QFontDatabase.addApplicationFont(str(path))
+    family = (
+        "Latin Modern Roman" if "Latin Modern Roman" in QFontDatabase.families() else "DejaVu Serif"
+    )
+    app.setFont(QFont(family, 10))
+    app.setProperty("walksim_font_installed", True)
+
+
 def apply_theme(app: QApplication, mode: str) -> None:
+    install_font(app)
     colors = theme_colors(mode)
     palette = QPalette()
     for role, value in (
