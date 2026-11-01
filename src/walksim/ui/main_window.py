@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QGridLayout,
     QGroupBox,
+    QHBoxLayout,
     QHeaderView,
     QInputDialog,
     QLabel,
@@ -33,6 +34,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QSpinBox,
     QSplitter,
+    QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
@@ -52,6 +54,7 @@ from walksim.ui.about_dialog import AboutDialog
 from walksim.ui.access_widget import AccessWidget
 from walksim.ui.analysis_widget import AnalysisWidget
 from walksim.ui.crossing_widget import CrossingWidget
+from walksim.ui.navigation import LINKED_TABS, RELATIONSHIPS, SUMMARIES, TAB_ORDER, tab_icon
 from walksim.ui.plaza_widget import PlazaWidget
 from walksim.ui.shared_widget import SharedWidget
 from walksim.ui.styles import apply_theme, theme_colors
@@ -157,6 +160,10 @@ class MainWindow(QMainWindow):
         self._loading = True
         self._busy = False
         self.worker: SimulationWorker | None = None
+        self._results_source = "walkway"
+        self._previous_workspace = None
+        self._pending_walkway_case = None
+        self._walkway_split_sizes = [365, 780]
 
         self.setWindowTitle(f"WalkSim Mobility {__version__}")
         self.settings = QSettings("VanLinux", "WalkSim Mobility")
@@ -176,7 +183,7 @@ class MainWindow(QMainWindow):
         self._connect_project_signals()
         self._loading = False
         self._set_clean()
-        self.tabs.setCurrentIndex(2)
+        self._show_tab("walkway")
         self._update_context_actions()
 
     def _create_actions(self) -> None:
@@ -273,45 +280,63 @@ class MainWindow(QMainWindow):
         self.scope_tab = self._build_scope_tab()
         self.project_tab = self._build_project_tab()
         self.corridor_tab = self._build_corridor_tab()
-        self.results_tab = self._build_results_tab()
-
-        self.tabs.addTab(self.scope_tab, "1  Inicio y alcance")
-        self.tabs.addTab(self._scrollable(self.project_tab), "2  Proyecto")
-        self.tabs.addTab(self._scrollable(self.corridor_tab), "3  Corredor peatonal")
-        self.tabs.addTab(self._scrollable(self.results_tab), "4  Resultados")
+        self.results_tab = self._build_corridor_results_view()
         self.analysis_widget = AnalysisWidget()
         self.analysis_widget.simulationImported.connect(self._import_corridor)
         self.analysis_widget.simulationRequested.connect(self.prepare_analysis_simulation)
-        self.tabs.insertTab(2, self._scrollable(self.analysis_widget), "3  Análisis peatonal")
-        self.tabs.setTabText(3, "4  Microsimulación")
-        self.tabs.setTabText(4, "5  Resultados simulados")
         self.walkway_widget = WalkwayWidget()
-        self.tabs.insertTab(2, self._scrollable(self.walkway_widget), "3  Walkway")
-        self.tabs.setTabText(0, "Inicio")
-        self.tabs.setTabText(1, "Proyecto")
-        self.tabs.setTabText(2, "Walkway")
-        self.tabs.setTabText(3, "Complementarios")
-        self.tabs.setTabText(4, "Corredor libre")
-        self.tabs.setTabText(5, "Resultados del corredor")
         self.walkway_widget.busyChanged.connect(self._walkway_busy)
+        self.walkway_widget.simulationCompleted.connect(self._walkway_simulated)
         self.walkway_widget.set_dark(self.theme == "dark")
         self.access_widget = AccessWidget()
-        self.tabs.addTab(self._scrollable(self.access_widget), "Accesos y colas")
         self.access_widget.busyChanged.connect(self._access_busy)
         self.access_widget.set_dark(self.theme == "dark")
         self.plaza_widget = PlazaWidget()
-        self.tabs.addTab(self._scrollable(self.plaza_widget), "Plaza y flujos cruzados")
         self.plaza_widget.busyChanged.connect(self._plaza_busy)
         self.plaza_widget.set_dark(self.theme == "dark")
         self.shared_widget = SharedWidget()
-        self.tabs.addTab(self._scrollable(self.shared_widget), "Sendero compartido")
         self.shared_widget.busyChanged.connect(self._shared_busy)
         self.shared_widget.set_dark(self.theme == "dark")
         self.crossing_widget = CrossingWidget()
-        self.tabs.addTab(self._scrollable(self.crossing_widget), "Cruce semaforizado")
         self.crossing_widget.busyChanged.connect(self._crossing_busy)
         self.crossing_widget.set_dark(self.theme == "dark")
-        self.tabs.currentChanged.connect(self._update_context_actions)
+        widgets = {
+            "home": self.scope_tab,
+            "project": self.project_tab,
+            "walkway": self.walkway_widget,
+            "corridor_results": self.results_tab,
+            "corridor": self.corridor_tab,
+            "analyses": self.analysis_widget,
+            "access": self.access_widget,
+            "plaza": self.plaza_widget,
+            "shared": self.shared_widget,
+            "crossing": self.crossing_widget,
+        }
+        self.pages = {}
+        for key, label in TAB_ORDER:
+            page = widgets[key] if key == "home" else self._scrollable(widgets[key])
+            page.setProperty("workspace", key)
+            self.pages[key] = page
+            self.tabs.addTab(page, label)
+        self.navigation_legend = QWidget()
+        legend_layout = QHBoxLayout(self.navigation_legend)
+        legend_layout.setContentsMargins(0, 0, 0, 0)
+        self.legend_icons = []
+        for linked, text in [(True, "Conectadas"), (False, "Independientes")]:
+            icon = QLabel()
+            self.legend_icons.append((icon, linked))
+            legend_layout.addWidget(icon)
+            label = QLabel(text)
+            label.setObjectName("pageSubtitle")
+            legend_layout.addWidget(label)
+        legend_layout.addStretch()
+        self.navigation_legend.setToolTip(
+            "Conectadas: comparten una vista de resultados o permiten preparar datos "
+            "mediante un botón. Independientes: sus datos y resultados son propios del módulo."
+        )
+        root.addWidget(self.navigation_legend)
+        self._refresh_navigation_icons()
+        self.tabs.currentChanged.connect(self._workspace_changed)
         root.addWidget(self.tabs, 1)
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
@@ -429,6 +454,12 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(page)
         layout.setContentsMargins(0, 12, 0, 0)
 
+        summary = QLabel(SUMMARIES["corridor"])
+        summary.setObjectName("pageSubtitle")
+        summary.setProperty("workspaceSummary", True)
+        summary.setWordWrap(True)
+        layout.addWidget(summary)
+
         splitter = QSplitter(Qt.Orientation.Horizontal)
         self.corridor_splitter = splitter
         splitter.setChildrenCollapsible(False)
@@ -538,6 +569,120 @@ class MainWindow(QMainWindow):
 
         return page
 
+    def _build_corridor_results_view(self):
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 12, 0, 0)
+        summary = QLabel(SUMMARIES["corridor_results"])
+        summary.setObjectName("pageSubtitle")
+        summary.setProperty("workspaceSummary", True)
+        summary.setWordWrap(True)
+        layout.addWidget(summary)
+        top = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.shared_results_header_layout = top
+        self.results_source_label = QLabel()
+        self.results_source_label.setWordWrap(True)
+        self.results_source_label.setTextFormat(Qt.TextFormat.PlainText)
+        self.results_source_label.setObjectName("infoBanner")
+        top.addWidget(self.results_source_label, 1)
+        self.results_return_button = QPushButton("Volver a Walkway")
+        self.results_return_button.clicked.connect(lambda: self._show_tab(self._results_source))
+        top.addWidget(self.results_return_button)
+        layout.addLayout(top)
+        self.results_stack = QStackedWidget()
+        self.walkway_results_host = QWidget()
+        host_layout = QVBoxLayout(self.walkway_results_host)
+        host_layout.setContentsMargins(0, 0, 0, 0)
+        self.results_stack.addWidget(self.walkway_results_host)
+        self.corridor_results_page = self._build_results_tab()
+        self.results_stack.addWidget(self.corridor_results_page)
+        layout.addWidget(self.results_stack)
+        return page
+
+    def _current_workspace(self):
+        page = self.tabs.currentWidget()
+        return page.property("workspace") if page else None
+
+    def _show_tab(self, key):
+        self.tabs.setCurrentWidget(self.pages[key])
+
+    def _refresh_navigation_icons(self):
+        for key, _label in TAB_ORDER:
+            index = self.tabs.indexOf(self.pages[key])
+            if key in {"home", "project"}:
+                continue
+            self.tabs.setTabIcon(index, tab_icon(key in LINKED_TABS, self.theme == "dark"))
+            relation = RELATIONSHIPS.get(
+                key, "Independiente: datos y resultados propios del módulo."
+            )
+            self.tabs.setTabToolTip(index, SUMMARIES[key] + "\n\n" + relation)
+            bar = self.tabs.tabBar()
+            if hasattr(bar, "setAccessibleTabName"):
+                bar.setAccessibleTabName(index, self.tabs.tabText(index) + ". " + relation)
+        for label, linked in self.legend_icons:
+            label.setPixmap(tab_icon(linked, self.theme == "dark").pixmap(18, 16))
+
+    def _workspace_changed(self, *_args):
+        key = self._current_workspace()
+        if key == "corridor_results" and self._previous_workspace in {"walkway", "corridor"}:
+            self._results_source = self._previous_workspace
+        self._previous_workspace = key
+        self._sync_corridor_results()
+        self._update_context_actions()
+
+    def _sync_corridor_results(self):
+        # Reuse the very same results widget, selections, tables and charts. No recalculation
+        # or conversion into the different free-corridor measurement definitions takes place.
+        results = self.walkway_widget.results
+        in_results = self._current_workspace() == "corridor_results"
+        if in_results and self._results_source == "walkway":
+            if results.parentWidget() is not self.walkway_results_host:
+                self._walkway_split_sizes = self.walkway_widget.splitter.sizes()
+                self.walkway_results_host.layout().addWidget(results)
+                results.show()
+            self.results_stack.setCurrentWidget(self.walkway_results_host)
+        else:
+            if results.parentWidget() is self.walkway_results_host:
+                self.walkway_widget.splitter.insertWidget(1, results)
+                self.walkway_widget.splitter.setSizes(self._walkway_split_sizes)
+                results.show()
+            self.results_stack.setCurrentWidget(self.corridor_results_page)
+        self._refresh_results_heading()
+
+    def _refresh_results_heading(self):
+        if self._results_source == "walkway":
+            text = "Origen: Walkway · " + self.walkway_widget.current["name"]
+            target = "Walkway"
+        else:
+            text, target = "Origen: Corredor libre", "Corredor libre"
+        self.results_source_label.setText(text)
+        self.results_return_button.setText("Volver a " + target)
+
+    def _show_corridor_results(self, source):
+        # A completed run keeps its own source even if another tab was opened while it ran.
+        self._results_source = source
+        self._previous_workspace = None
+        self._show_tab("corridor_results")
+        self._previous_workspace = "corridor_results"
+        self._sync_corridor_results()
+        self._update_context_actions()
+
+    def _walkway_simulated(self, case_id):
+        self._pending_walkway_case = case_id
+        if not self._busy:
+            self._open_walkway_results()
+
+    def _open_walkway_results(self):
+        case_id, self._pending_walkway_case = self._pending_walkway_case, None
+        panel = self.walkway_widget
+        if not any(c["id"] == case_id for c in panel.cases):
+            return
+        if panel.selected_id != case_id:
+            panel.selected_id = case_id
+            panel._refresh_selector()
+            panel._load_current()
+        self._show_corridor_results("walkway")
+
     def _build_results_tab(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
@@ -547,7 +692,7 @@ class MainWindow(QMainWindow):
         self.results_header_layout = top
         title_box = QVBoxLayout()
 
-        title = QLabel("Resultados del corredor")
+        title = QLabel("Microsimulación de Corredor libre")
         title.setObjectName("sectionTitle")
         self.result_status = QLabel("Aún no se ha ejecutado una simulación.")
         self.result_status.setObjectName("pageSubtitle")
@@ -658,6 +803,7 @@ class MainWindow(QMainWindow):
         self.plaza_widget.set_dark(mode == "dark")
         self.shared_widget.set_dark(mode == "dark")
         self.crossing_widget.set_dark(mode == "dark")
+        self._refresh_navigation_icons()
 
     def resizeEvent(self, event) -> None:  # noqa: N802
         super().resizeEvent(event)
@@ -681,6 +827,7 @@ class MainWindow(QMainWindow):
         )
         self.header_layout.setDirection(direction)
         self.results_header_layout.setDirection(direction)
+        self.shared_results_header_layout.setDirection(direction)
         columns = 1 if width < 650 else (2 if width < 1100 else 4)
         for card in self.metric_cards:
             self.cards_layout.removeWidget(card)
@@ -717,6 +864,7 @@ class MainWindow(QMainWindow):
         self.progress.setVisible(busy)
         self.corridor_tab.setEnabled(not busy)
         self.walkway_widget.setEnabled(not busy)
+        self.walkway_widget.results.setEnabled(not busy)
         self.access_widget.setEnabled(not busy)
         self.plaza_widget.setEnabled(not busy)
         self.shared_widget.setEnabled(not busy)
@@ -772,6 +920,7 @@ class MainWindow(QMainWindow):
         self._mark_dirty()
 
     def _show_simulation(self, record: dict) -> None:
+        self._results_source = "corridor"
         scenario = CorridorScenario(**record["scenario"])
         result = SimulationResult(
             **{key: DirectionResult(**value) for key, value in record["result"].items()}
@@ -823,7 +972,7 @@ class MainWindow(QMainWindow):
             + "</p>"
         )
 
-        self.tabs.setCurrentIndex(5)
+        self._show_corridor_results("corridor")
         self.statusBar().showMessage("Simulación completada")
 
     def _set_result_row(self, row: int, label: str, result: DirectionResult) -> None:
@@ -858,6 +1007,7 @@ class MainWindow(QMainWindow):
             widget.valueChanged.connect(self._mark_dirty)
         self.analysis_widget.changed.connect(self._mark_dirty)
         self.walkway_widget.changed.connect(self._mark_dirty)
+        self.walkway_widget.changed.connect(self._refresh_results_heading)
         self.access_widget.changed.connect(self._mark_dirty)
         self.plaza_widget.changed.connect(self._mark_dirty)
         self.shared_widget.changed.connect(self._mark_dirty)
@@ -966,6 +1116,8 @@ class MainWindow(QMainWindow):
 
     def _apply_project(self, state: ProjectState) -> None:
         self._loading = True
+        self._pending_walkway_case = None
+        self._results_source = "walkway"
         self.project_name.setText(state.project.name)
         self.project_location.setText(state.project.location)
         self.project_analyst.setText(state.project.analyst)
@@ -990,19 +1142,20 @@ class MainWindow(QMainWindow):
             self.result_status.setText("Aún no se ha ejecutado una simulación.")
             self.output_label.clear()
             self.measurement_browser.clear()
-        self.tabs.setCurrentIndex(
-            7
+        self._show_tab(
+            "plaza"
             if state.plaza and any(c.get("analytical") for c in state.plaza["cases"])
-            else 6
+            else "access"
             if state.access and any(c.get("analytical") for c in state.access["cases"])
-            else 2
+            else "walkway"
             if state.walkway
-            else 1
+            else "project"
         )
         if state.shared and any(c.get("analytical") for c in state.shared["cases"]):
-            self.tabs.setCurrentIndex(8)
+            self._show_tab("shared")
         if state.crossing and any(c.get("analytical") for c in state.crossing["cases"]):
-            self.tabs.setCurrentIndex(9)
+            self._show_tab("crossing")
+        self._sync_corridor_results()
         self._loading = False
 
     def new_project(self, *_args) -> None:
@@ -1013,16 +1166,10 @@ class MainWindow(QMainWindow):
         self._set_clean()
 
     def _active_scope(self):
-        return {
-            2: "walkway",
-            3: "analyses",
-            4: "corridor",
-            5: "corridor",
-            6: "access",
-            7: "plaza",
-            8: "shared",
-            9: "crossing",
-        }.get(self.tabs.currentIndex())
+        key = self._current_workspace()
+        if key == "corridor_results":
+            return self._results_source
+        return key if key in SCOPE_TITLES else None
 
     def _update_context_actions(self, *_args):
         scope = self._active_scope()
@@ -1044,7 +1191,7 @@ class MainWindow(QMainWindow):
 
     def _active_report_state(self):
         state = self.collect_project()
-        if self.tabs.currentIndex() == 4:
+        if self._current_workspace() == "corridor":
             # No exportar una simulación antigua como si correspondiera al formulario actual.
             current = asdict(self._scenario_from_ui())
             state.simulations = [r for r in state.simulations if r["scenario"] == current]
@@ -1155,7 +1302,7 @@ class MainWindow(QMainWindow):
         for widget, value in pairs:
             widget.setValue(value)
         self._update_preview()
-        self.tabs.setCurrentIndex(4)
+        self._show_tab("corridor")
         self._mark_dirty()
 
     def closeEvent(self, event) -> None:  # noqa: N802
@@ -1243,11 +1390,15 @@ class MainWindow(QMainWindow):
         )
 
     def _walkway_busy(self, busy: bool) -> None:
+        if busy:
+            self._pending_walkway_case = None
         self._busy = busy
         self._set_busy(busy)
         self.statusBar().showMessage(
             "Ejecutando escenario Walkway…" if busy else "Escenario Walkway listo para revisar"
         )
+        if not busy and self._pending_walkway_case is not None:
+            self._open_walkway_results()
 
     def show_guide(self, *_args, methodology: bool = False) -> None:
         dialog = QDialog(self)
@@ -1290,7 +1441,8 @@ class MainWindow(QMainWindow):
                 "Comparar para evaluarlas.</li>"
                 "<li>Despliegue Opciones de microsimulación para ajustar "
                 "calentamiento, periodo y semilla. "
-                "Pulse Ejecutar microsimulación para obtener la comparación y las gráficas.</li>"
+                "Pulse Ejecutar microsimulación; al terminar se abre Resultados del corredor "
+                "con el origen Walkway y sus tablas y gráficas.</li>"
                 "<li>En Archivo guarde .wksim y exporte el reporte .tex. Los archivos "
                 "2.1 se pueden abrir; "
                 "guarde una copia en formato 3 para conservar el original.</li></ol>"

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
-from PySide6.QtCore import QSettings, Qt
+from PySide6.QtCore import QEvent, QSettings, Qt
 from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import QApplication, QLabel
 
@@ -26,6 +26,8 @@ def window(tmp_path, monkeypatch):
     yield widget, app
     widget.setWindowModified(False)
     widget.close()
+    widget.deleteLater()
+    app.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
 def test_theme_persists_without_changing_scenario(window):
@@ -65,7 +67,7 @@ def test_small_screen_navigation_and_controls(window, width, height, columns):
     app.processEvents()
     center = widget.seed_spin.mapTo(scroll.viewport(), widget.seed_spin.rect().center())
     assert scroll.viewport().rect().contains(center)
-    widget.tabs.setCurrentIndex(5)
+    widget._show_tab("corridor_results")
     app.processEvents()
     if width < 1000:
         assert widget.results_table.horizontalScrollBar().maximum() > 0
@@ -90,7 +92,8 @@ def test_simulation_result_still_opens_results_tab(window, monkeypatch, tmp_path
     while widget._busy and time.monotonic() < deadline:
         _app.processEvents()
     assert not widget._busy
-    assert widget.tabs.currentIndex() == 5
+    assert widget._current_workspace() == "corridor_results"
+    assert widget._active_scope() == "corridor"
     assert widget.last_output_dir == tmp_path
     assert widget.results_table.item(2, 0).text() == "Total"
 
@@ -302,6 +305,7 @@ def test_access_worker_runs_without_blocking_file_and_close_guards(window, monke
     # Keep this a thread/lifecycle check; rendering is covered by the actual result tests.
     original_render = panel.render
     panel.render = lambda: None
+    widget._show_tab("access")
     panel.simulate()
     assert widget._busy and not widget.save_action.isEnabled()
     deadline = time.monotonic() + 5
@@ -309,6 +313,7 @@ def test_access_worker_runs_without_blocking_file_and_close_guards(window, monke
         app.processEvents()
     assert not widget._busy and panel.worker is None
     assert widget.save_action.isEnabled() and panel.current["simulation"] == result
+    assert widget._current_workspace() == "access"
     panel.current["simulation"] = None
     panel.render = original_render
 

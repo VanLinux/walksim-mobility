@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from PySide6.QtCore import QSettings
+from PySide6.QtCore import QEvent, QSettings
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton
 
 from walksim import __version__
@@ -100,6 +100,8 @@ def window(tmp_path, monkeypatch):
     yield w, app
     w.setWindowModified(False)
     w.close()
+    w.deleteLater()
+    app.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
 def test_menus_and_examples_follow_active_module_without_overwriting(window, monkeypatch):
@@ -110,7 +112,7 @@ def test_menus_and_examples_follow_active_module_without_overwriting(window, mon
     for index in (0, 1):
         w.tabs.setCurrentIndex(index)
         assert not w.simulate_action.isEnabled() and not w.report_action.isEnabled()
-    w.tabs.setCurrentIndex(3)
+    w._show_tab("analyses")
     assert not w.simulate_action.isEnabled() and w.report_action.isEnabled()
     calls = []
     panels = {
@@ -179,7 +181,7 @@ def test_export_command_scopes_data_and_refuses_stale_corridor(
     path.unlink()
     w.export_report()
     assert not path.exists() and notes
-    w.tabs.setCurrentIndex(5)
+    w._show_tab("corridor_results")
     assert w._active_report_state().simulations == mixed.simulations[-1:]
     w.export_report()
     assert "Microsimulación peatonal" in path.read_text()
@@ -208,7 +210,7 @@ def test_corridor_example_worker_preserves_form_and_results_are_labelled(
         app.processEvents()
     assert not w._busy
     assert asdict(w._scenario_from_ui()) == original
-    assert w.tabs.currentIndex() == 5
+    assert w._current_workspace() == "corridor_results"
     assert w.simulation_records[-1]["name"] == "Ejemplo · Corredor libre"
     assert "Ejemplo" in w.result_status.text()
     assert w.simulation_records[-1]["scenario"]["length_m"] != original["length_m"]

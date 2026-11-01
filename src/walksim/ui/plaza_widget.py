@@ -42,6 +42,7 @@ from walksim.plaza_io import export_matrix, import_cases, import_matrix, templat
 from walksim.report import display
 from walksim.sumo.plaza import run_plaza_simulation
 from walksim.ui.access_widget import AccessWidget
+from walksim.ui.navigation import SUMMARIES
 from walksim.ui.walkway_widget import ORIGINS
 from walksim.walkway_io import write_rows
 
@@ -68,9 +69,7 @@ class PlazaWidget(AccessWidget):
     export_stem = "plaza"
     title = "Plazas y flujos cruzados"
     eyebrow = "CROSS-FLOW / PLAZA  ·  DEMANDA LOCAL Y DENSIDAD"
-    subtitle = (
-        "Defina sus accesos, distribuya los flujos y explore dónde se concentran los peatones."
-    )
+    subtitle = SUMMARIES["plaza"]
     compare_label = "Calcular geometría y demanda de todos los casos"
     metrics = [
         ("area", "ÁREA ANALIZADA"),

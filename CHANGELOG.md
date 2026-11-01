@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## 3.4.2 — Navegación y presentación
+
+- Resumen breve de cálculos y resultados en todas las ventanas desde Walkway.
+- Walkway, Resultados del corredor, Corredor libre y Complementarios se agrupan en pestañas adyacentes.
+- Identificadores neutros y discretos, leyenda y textos de ayuda distinguen ventanas conectadas de módulos independientes.
+- Una microsimulación de Walkway completada abre automáticamente sus resultados existentes en Resultados del corredor, con el origen y el nombre del escenario visibles.
+- La vista comparte las tablas, selección y gráficas de Walkway; los resultados de Corredor libre mantienen su presentación y definición propias.
+- Un botón devuelve al formulario de origen. El reporte y Simular ejemplo respetan el origen mostrado.
+- No se modifican cálculos, modelos, entradas ni esquema .wksim.
+
+
 ## 3.4.1 — Correcciones de menús y reportes
 
 - Archivo exporta el reporte LaTeX de la ventana activa, con los resultados actuales y las figuras de ese módulo, sin mezclar estudios de otras pestañas.

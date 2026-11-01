@@ -35,6 +35,7 @@ from walksim.domain.crossing import (
 from walksim.report import display
 from walksim.sumo.crossing import run_crossing_simulation
 from walksim.ui.access_widget import AccessWidget
+from walksim.ui.navigation import SUMMARIES
 from walksim.ui.walkway_widget import ORIGINS
 
 
@@ -84,7 +85,7 @@ class CrossingWidget(AccessWidget):
     export_stem = "cruce"
     title = "Cruce semaforizado"
     eyebrow = "CRUCE PEATONAL  /  ESPERA Y OPERACIÓN"
-    subtitle = "Un cruce, sus peatones y una alternativa para comparar."
+    subtitle = SUMMARIES["crossing"]
     compare_label = "Actualizar referencias"
     metrics = [
         ("reference", "RECORRIDO DE REFERENCIA"),

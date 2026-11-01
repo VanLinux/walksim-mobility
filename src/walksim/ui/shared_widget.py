@@ -38,6 +38,7 @@ from walksim.report import display
 from walksim.shared_io import import_cases, template
 from walksim.sumo.shared import run_shared_simulation
 from walksim.ui.access_widget import AccessWidget
+from walksim.ui.navigation import SUMMARIES
 from walksim.ui.walkway_widget import ORIGINS
 from walksim.walkway_io import write_rows
 
@@ -64,7 +65,7 @@ class SharedWidget(AccessWidget):
     export_stem = "sendero"
     title = "Senderos compartidos"
     eyebrow = "SHARED PATH  /  PEATONES Y BICICLETAS"
-    subtitle = "Evalúe el nivel de servicio por sentido y compare la convivencia de ambos modos."
+    subtitle = SUMMARIES["shared"]
     compare_label = "Calcular y comparar todos los escenarios"
     metrics = [
         ("plos_ab", "PLOS · A → B"),

@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
 from walksim.csv_io import read_csv, write_template
 from walksim.domain.analysis import METHODS, calculate
 from walksim.report import display
+from walksim.ui.navigation import SUMMARIES
 
 
 class AnalysisWidget(QWidget):
@@ -44,6 +45,11 @@ class AnalysisWidget(QWidget):
         self._loading = False
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 12, 0, 0)
+        summary = QLabel(SUMMARIES["analyses"])
+        summary.setObjectName("pageSubtitle")
+        summary.setProperty("workspaceSummary", True)
+        summary.setWordWrap(True)
+        layout.addWidget(summary)
         self.selector = QComboBox()
         self.selector.setSizeAdjustPolicy(
             QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon

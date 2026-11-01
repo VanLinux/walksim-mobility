@@ -42,6 +42,7 @@ from walksim.analysis.figures import draw_walkway
 from walksim.domain.walkway import WalkwayInput, evaluate_walkway, new_case, signature
 from walksim.report import display
 from walksim.sumo.walkway import run_walkway_simulation
+from walksim.ui.navigation import SUMMARIES
 from walksim.ui.walkway_labels import INPUT_LABELS
 from walksim.walkway_io import import_cases, input_keys, template, write_rows
 
@@ -110,6 +111,7 @@ class WalkwayWidget(QWidget):
 
     changed = Signal()
     busyChanged = Signal(bool)
+    simulationCompleted = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
@@ -130,9 +132,8 @@ class WalkwayWidget(QWidget):
         title = QLabel("Corredores peatonales")
         title.setObjectName("workTitle")
         layout.addWidget(title)
-        subtitle = QLabel(
-            "Evalúe un corredor, dimensione su ancho y compare alternativas en un mismo estudio."
-        )
+        subtitle = QLabel(SUMMARIES["walkway"])
+        subtitle.setProperty("workspaceSummary", True)
         subtitle.setWordWrap(True)
         subtitle.setObjectName("pageSubtitle")
         layout.addWidget(subtitle)
@@ -551,6 +552,7 @@ class WalkwayWidget(QWidget):
         case["simulation"] = result
         self.render()
         self.changed.emit()
+        self.simulationCompleted.emit(case["id"])
 
     def _failed(self, _detail):
         self.status.setText("No fue posible completar la microsimulación.")

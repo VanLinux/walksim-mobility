@@ -232,3 +232,11 @@ se mantiene la lectura de los esquemas de esta guía.
 ### Reporte de esta ventana (3.4.1)
 
 Abra esta pestaña y use Archivo → Exportar reporte .tex. Solo se incluyen los casos con resultados actuales de este módulo, su método, entradas, procedencia y gráficas. Los resultados obsoletos se excluyen. El nombre del analista se conserva en Proyecto; guardar .wksim sigue guardando todos los módulos.
+
+## Navegación desde 3.4.2
+
+Walkway y Resultados del corredor son adyacentes. Calcule el escenario y ejecute su microsimulación desde Walkway; al terminar correctamente se abre Resultados del corredor con **Origen: Walkway** y el nombre del escenario. Allí se consultan las mismas tablas, comparación, gráficas y datos que en Walkway. **Volver a Walkway** regresa al formulario sin perder la selección ni los resultados.
+
+Corredor libre conserva su propia simulación y utiliza esa vista con **Origen: Corredor libre**. El origen permanece explícito aunque se cambie de pestaña durante la ejecución. Desde Archivo, el reporte corresponde a la fuente mostrada. Una ejecución fallida no cambia automáticamente de ventana.
+
+Los iconos de dos anillos enlazados identifican las ventanas relacionadas; el anillo sencillo distingue módulos independientes. Complementarios se agrupa junto a Corredor libre porque algunos casos analíticos pueden prepararle datos mediante su botón. No hay transferencia automática de datos entre Walkway y Corredor libre.

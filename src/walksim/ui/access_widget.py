@@ -47,6 +47,7 @@ from walksim.domain.access import (
 )
 from walksim.report import display
 from walksim.sumo.access import run_access_simulation
+from walksim.ui.navigation import SUMMARIES
 from walksim.ui.walkway_widget import ORIGINS, StableCanvas, WalkwayWidget
 
 
@@ -72,7 +73,7 @@ class AccessWidget(WalkwayWidget):
     export_stem = "accesos"
     title = "Accesos y colas"
     eyebrow = "ACCESS & QUEUE  /  CAPACIDAD Y ESPERA"
-    subtitle = "Compare dispositivos, descargas y alternativas de una estación sencilla."
+    subtitle = SUMMARIES["access"]
     compare_label = "Calcular capacidades de todos los casos"
     metrics = [
         ("capacity", "CAPACIDAD DE SERVICIO"),
@@ -97,6 +98,8 @@ class AccessWidget(WalkwayWidget):
         ]:
             label = QLabel(text)
             label.setObjectName(style)
+            if style == "pageSubtitle":
+                label.setProperty("workspaceSummary", True)
             label.setWordWrap(True)
             layout.addWidget(label)
         self.case_bar = QBoxLayout(QBoxLayout.Direction.LeftToRight)

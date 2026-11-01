@@ -4,6 +4,20 @@
 
 El usuario no necesita editar archivos XML, utilizar NetEdit ni programar escenarios de SUMO.
 
+## Versión 3.4.2 — Pestañas y navegación
+
+Todas las ventanas de trabajo, desde Walkway, muestran un resumen breve de sus cálculos y resultados.
+
+Las pestañas conectadas están juntas: **Walkway → Resultados del corredor → Corredor libre → Complementarios**. Dos anillos enlazados identifican estas ventanas; un anillo sencillo identifica los módulos independientes (Accesos y colas, Plaza, Sendero compartido y Cruce semaforizado). La leyenda y los textos al pasar el puntero explican la relación.
+
+- **Walkway → Calcular escenario → Ejecutar microsimulación → Resultados del corredor.** Al terminar correctamente, se abre automáticamente la vista de resultados de ese escenario Walkway, con sus tablas y gráficas existentes.
+- **Corredor libre** también abre Resultados del corredor al terminar. La vista indica siempre el origen de los datos y permite volver a su formulario.
+- Walkway y Corredor libre conservan datos y mediciones propios. Consultar resultados no transfiere, convierte ni recalcula datos entre ellos.
+- **Complementarios** mantiene sus cálculos analíticos y puede preparar algunos casos para Corredor libre mediante su botón existente.
+- Archivo → Exportar reporte .tex, desde Resultados del corredor, utiliza el origen mostrado: Walkway o Corredor libre.
+
+Se mantienen los métodos de cálculo y el formato .wksim. [Guía de Walkway](docs/WALKWAY3.md).
+
 ## Versión 3.4.1 — Trabajo y reportes por pestaña
 
 - Archivo → Exportar reporte .tex genera únicamente resultados actuales de la pestaña activa, con identificación y analista. En un módulo se incluyen sus alternativas calculadas; Resultados del corredor exporta la ejecución mostrada. Inicio y Proyecto no exportan resultados.
