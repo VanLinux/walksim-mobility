@@ -6,7 +6,6 @@ import bisect
 import heapq
 import math
 import random
-import subprocess
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import UTC, datetime
@@ -18,6 +17,7 @@ from walksim.domain.access import AccessInput, evaluate_access, stages
 from walksim.domain.models import CorridorScenario
 from walksim.sumo.generator import _write_xml, build_corridor_files
 from walksim.sumo.runner import SumoExecutionError, _run_command, detect_sumo
+from walksim.sumo.runtime import engine_version
 from walksim.sumo.walkway import generate_arrivals
 
 MAX_PEOPLE = 10000
@@ -322,15 +322,13 @@ def run_access_simulation(raw, output_dir=None):
             "Quedan personas pendientes al límite de despeje. La espera y el tiempo "
             "de recorrido de la cohorte completada pueden estar sesgados a la baja."
         )
-    version = subprocess.run(
-        [installation.sumo, "--version"], capture_output=True, text=True, timeout=10, check=False
-    ).stdout.splitlines()
+    version = engine_version(str(installation.sumo))
     return dict(
         inputs=x.to_dict(),
         signature=a["signature"],
         analytical=a,
         created_at=datetime.now(UTC).isoformat(),
-        engine_version=version[0] if version else "?",
+        engine_version=version,
         summary=summary,
         stages=stage_results,
         series=series,

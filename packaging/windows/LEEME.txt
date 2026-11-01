@@ -1,0 +1,24 @@
+WalkSim Mobility — Windows 11 x64
+
+Abra WalkSim Mobility desde el acceso directo del escritorio o del menú Inicio.
+
+El instalador incluye Python, las bibliotecas de la interfaz y de gráficas,
+las fuentes Latin Modern y Eclipse SUMO 1.28.0 (sumo y netconvert).
+La instalación y el uso no requieren conexión a Internet, Python instalado,
+cambios en PATH ni permisos de administrador.
+
+Guarde sus estudios .wksim en Documentos u otra carpeta personal.
+Los ejemplos y las plantillas CSV están en la carpeta examples de la instalación.
+Puede abrir esa carpeta desde el acceso "Ejemplos y plantillas" del menú Inicio.
+
+Archivo > Exportar reporte .tex exporta los resultados del espacio de trabajo
+activo. Suba el .tex y su carpeta de figuras (si se genera) a Overleaf.
+No se incluye un compilador LaTeX.
+
+Puede desinstalar desde Configuración > Aplicaciones > Aplicaciones instaladas.
+Los estudios guardados en sus carpetas personales se conservan.
+
+Autor: Héctor Alonso Benítez García
+Licencia: GPL-3.0-only
+Repositorio: https://github.com/VanLinux/walksim-mobility
+

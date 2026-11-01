@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-import subprocess
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
@@ -13,6 +12,7 @@ from walksim.analysis.crossing import summarize
 from walksim.domain.crossing import CrossingInput, evaluate_crossing, signature
 from walksim.sumo.generator import _write_xml
 from walksim.sumo.runner import SumoExecutionError, _run_command, detect_sumo
+from walksim.sumo.runtime import engine_version
 from walksim.sumo.walkway import generate_arrivals
 
 
@@ -253,9 +253,7 @@ def run_crossing_simulation(raw, output_dir=None):
             f"El motor registró {collisions} colisiones/solapamientos. "
             "Revise la representación antes de interpretar los resultados."
         )
-    version = subprocess.run(
-        [installation.sumo, "--version"], capture_output=True, text=True, timeout=10, check=False
-    ).stdout.splitlines()
+    version = engine_version(str(installation.sumo))
     return dict(
         **result,
         inputs=x.to_dict(),

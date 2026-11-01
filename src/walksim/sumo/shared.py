@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 import random
-import subprocess
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,6 +13,7 @@ from walksim.analysis.shared import summarize
 from walksim.domain.shared import SharedInput, evaluate_shared, flows
 from walksim.sumo.generator import _write_xml
 from walksim.sumo.runner import SumoExecutionError, _run_command, detect_sumo
+from walksim.sumo.runtime import engine_version
 from walksim.sumo.walkway import generate_arrivals
 
 
@@ -195,15 +195,13 @@ def run_shared_simulation(raw, output_dir=None):
     warnings.append(
         "Los eventos simulados no sustituyen la probabilidad documentada usada en BLOS."
     )
-    version = subprocess.run(
-        [installation.sumo, "--version"], capture_output=True, text=True, timeout=10, check=False
-    ).stdout.splitlines()
+    version = engine_version(str(installation.sumo))
     return dict(
         **data,
         inputs=x.to_dict(),
         signature=a["signature"],
         analytical=a,
-        engine_version=version[0] if version else "?",
+        engine_version=version,
         created_at=datetime.now(UTC).isoformat(),
         sample_s=0.5,
         collisions=collisions,

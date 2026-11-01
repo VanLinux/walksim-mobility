@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import random
-import subprocess
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 
@@ -12,6 +11,7 @@ from walksim.domain.models import CorridorScenario
 from walksim.domain.walkway import evaluate_walkway
 from walksim.sumo.generator import _write_xml, build_corridor_files
 from walksim.sumo.runner import SumoExecutionError, _run_command, detect_sumo
+from walksim.sumo.runtime import engine_version
 
 
 def generate_arrivals(
@@ -118,9 +118,7 @@ def run_walkway_simulation(raw: dict, output_dir=None) -> dict:
     )
     if not files.personinfo.exists():
         raise SumoExecutionError("La simulación no generó resultados peatonales.")
-    version = subprocess.run(
-        [installation.sumo, "--version"], capture_output=True, text=True, timeout=10, check=False
-    ).stdout.splitlines()
+    version = engine_version(str(installation.sumo))
     data = summarize(files.personinfo, analytical, generated)
     return dict(
         **data,
@@ -128,7 +126,7 @@ def run_walkway_simulation(raw: dict, output_dir=None) -> dict:
         signature=analytical["signature"],
         analytical=analytical,
         created_at=datetime.now(UTC).isoformat(),
-        engine_version=version[0] if version else "?",
+        engine_version=version,
         model="striping",
         generated_by_direction=generated,
     )

@@ -1,0 +1,167 @@
+name: Instalador Windows completo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'build/windows-*']
+    paths:
+      - 'src/**'
+      - 'packaging/**'
+      - 'pyproject.toml'
+      - '.github/workflows/windows-installer.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Construir instalador con Python y SUMO
+    runs-on: windows-2022
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: packaging/windows/requirements-build.txt
+      - name: Instalar dependencias de construcción
+        run: |
+          python -m pip install -r packaging/windows/requirements-build.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install -e '.[dev]'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preparar recursos y distribución oficial de SUMO
+        run: |
+          python packaging/windows/prepare.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "$(Resolve-Path build/windows/sumo/bin)" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verificar código y pruebas de WalkSim
+        env:
+          QT_QPA_PLATFORM: offscreen
+          PYTHONUTF8: '1'
+        run: |
+          ruff check src tests packaging/windows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pytest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Congelar Python y aplicación
+        run: python -m PyInstaller --clean --noconfirm packaging/windows/walksim.spec
+      - name: Incluir SUMO, fuentes y licencias
+        run: python packaging/windows/prepare.py --stage
+      - name: Construir instalador
+        run: |
+          $version = (Get-Content build/windows/build-info.json -Raw | ConvertFrom-Json).version
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw 'Inno Setup 6 no está disponible en el runner' }
+          & $iscc "/DAppVersion=$version" packaging/windows/installer.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem dist/installer/*.exe | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)" | Out-File dist/installer/SHA256SUMS.txt -Encoding ascii
+          }
+      - name: Conservar instalador
+        uses: actions/upload-artifact@v4
+        with:
+          name: WalkSim-Windows-completo
+          path: dist/installer/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+      - name: Conservar diagnóstico de construcción
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-build-diagnostics
+          path: |
+            build/windows/build-info.json
+            build/walksim/warn-walksim.txt
+          if-no-files-found: ignore
+
+  installed-test:
+    name: Probar instalación y SUMO sin PATH externo
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: WalkSim-Windows-completo
+          path: installer
+      - name: Instalar, calcular, simular y desinstalar
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem installer/*.exe).FullName
+          $project = Get-Content pyproject.toml -Raw
+          $version = [regex]::Match($project, '(?m)^version = "([^"]+)"').Groups[1].Value
+          ./packaging/windows/test-install.ps1 -Installer $installer -ExpectedVersion $version
+      - name: Conservar resultados de instalación
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-installation-results
+          path: installation-results/
+          if-no-files-found: ignore
+
+  publish:
+    name: Publicar instalador completo
+    needs: [build, installed-test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/build/windows-'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: WalkSim-Windows-completo
+          path: installer
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const version = fs.readFileSync('pyproject.toml', 'utf8').match(/^version = "([^"]+)"/m)[1];
+            const tag = `windows-v${version}`;
+            // Conserva un instalador ya publicado: nunca sustituir una versión silenciosamente.
+            let existing;
+            try {
+              existing = await github.rest.repos.getReleaseByTag({...context.repo, tag});
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (existing) {
+              const published = await github.rest.repos.getCommit({...context.repo, ref: tag});
+              const current = await github.rest.repos.getCommit({...context.repo, ref: context.sha});
+              if (published.data.commit.tree.sha !== current.data.commit.tree.sha) {
+                throw new Error(`La versión ${version} ya tiene otro código publicado. Use una versión nueva.`);
+              }
+              const names = existing.data.assets.map(asset => asset.name);
+              if (!names.includes(`WalkSim-Mobility-${version}-Windows-x64-Setup.exe`) ||
+                  !names.includes('SHA256SUMS.txt')) {
+                throw new Error('La publicación existente está incompleta; no se sobrescribe automáticamente.');
+              }
+              core.summary.addLink('Instalador ya publicado', existing.data.html_url).write();
+              return;
+            }
+            const release = await github.rest.repos.createRelease({
+              ...context.repo, tag_name: tag, target_commitish: context.sha,
+              name: `WalkSim ${version} — Windows con SUMO`, prerelease: false,
+              body: `Instalador completo para Windows 11 x64. Incluye Python, bibliotecas y Eclipse SUMO 1.28.0. No requiere Python ni SUMO externos, cambios en PATH ni instalaciones adicionales. No incluye LaTeX: los informes .tex se compilan en Overleaf. Se comprobaron automáticamente la instalación, interfaz, fuentes, ejemplos, cálculos, guardado .wksim, reportes .tex con figuras PDF, las seis microsimulaciones y la desinstalación con PATH aislado en Windows Server 2022, en una carpeta con espacios y acentos. Falta la comprobación manual del docente en sus equipos Windows 11. Descargue el archivo terminado en Setup.exe. El instalador no está firmado digitalmente.`
+            });
+            for (const file of fs.readdirSync('installer')) {
+              await github.rest.repos.uploadReleaseAsset({
+                ...context.repo, release_id: release.data.id, name: file,
+                data: fs.readFileSync(`installer/${file}`)
+              });
+            }
+            core.summary.addLink('Descargar instalador', release.data.html_url).write();
+
+
+

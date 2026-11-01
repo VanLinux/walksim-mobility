@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-import subprocess
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
@@ -13,6 +12,7 @@ from walksim.analysis.plaza import summarize
 from walksim.domain.plaza import PORTS, PlazaInput, evaluate_plaza, polygon, ports
 from walksim.sumo.generator import _write_xml
 from walksim.sumo.runner import SumoExecutionError, _run_command, detect_sumo
+from walksim.sumo.runtime import engine_version
 from walksim.sumo.walkway import generate_arrivals
 
 
@@ -206,9 +206,7 @@ def run_plaza_simulation(raw, output_dir=None):
     if not (folder / "persons.xml").exists() or not (folder / "positions.xml").exists():
         raise SumoExecutionError("La ejecución no generó las salidas peatonales necesarias.")
     result = summarize(folder / "persons.xml", folder / "positions.xml", x, entries)
-    version = subprocess.run(
-        [installation.sumo, "--version"], capture_output=True, text=True, timeout=10, check=False
-    ).stdout.splitlines()
+    version = engine_version(str(installation.sumo))
     warnings = []
     if result["summary"]["pending"]:
         warnings.append(
@@ -229,7 +227,7 @@ def run_plaza_simulation(raw, output_dir=None):
         signature=a["signature"],
         analytical=a,
         created_at=datetime.now(UTC).isoformat(),
-        engine_version=version[0] if version else "?",
+        engine_version=version,
         model="striping",
         sample_s=1,
         warnings=warnings,
