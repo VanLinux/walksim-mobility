@@ -43,7 +43,7 @@ Write-Output (Get-Content $report -Raw)
 if (-not $result.ok) { throw $result.error }
 if ($result.version -ne $ExpectedVersion) { throw 'La versión interna no corresponde al instalador' }
 $required = @('bundled_sumo_and_netconvert', 'gui_tabs_fonts_and_themes',
-    'bundled_examples', 'corridor_simulation', 'walkway_simulation', 'access_simulation',
+    'bundled_examples', 'csv_templates_and_matrix', 'corridor_simulation', 'walkway_simulation', 'access_simulation',
     'plaza_simulation', 'shared_simulation', 'crossing_simulation',
     'save_and_reopen_wksim', 'latex_reports_and_pdf_figures_without_tex', 'gui_with_saved_results')
 foreach ($check in $required) {

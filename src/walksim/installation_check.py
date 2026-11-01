@@ -73,6 +73,19 @@ def check_installation(folder: Path) -> dict:
         load_project(example)
     checks.append("bundled_examples")
 
+    from walksim.crossing_io import import_cases, template
+    from walksim.plaza_io import export_matrix, import_matrix
+
+    csv_path = folder / "Cruce México.csv"
+    template(csv_path)
+    require(len(import_cases(csv_path)) == 1, "La plantilla CSV no se recuperó.")
+    require(b"\r\r\n" not in csv_path.read_bytes(), "El CSV contiene saltos duplicados.")
+    matrix_path = folder / "Matriz México.csv"
+    matrix = plaza.PlazaInput().od
+    export_matrix(matrix_path, matrix)
+    require(import_matrix(matrix_path) == matrix, "No se recuperó la matriz CSV.")
+    checks.append("csv_templates_and_matrix")
+
     scenario = CorridorScenario(
         length_m=20, width_m=3, analysis_time_s=60, flow_ab_pph=120, flow_ba_pph=120
     )
@@ -133,6 +146,7 @@ def check_installation(folder: Path) -> dict:
     summaries = {}
     for name, (domain, run, inputs) in modules.items():
         result = run(inputs, folder / (name + " México"))
+        require("1.28.0" in result["engine_version"], f"{name}: motor inesperado.")
         summary = result["summary"]
         require(summary["generated"] > 0, f"{name}: no se generó demanda.")
         require(summary["completed"] > 0, f"{name}: no se completaron recorridos.")
@@ -151,7 +165,8 @@ def check_installation(folder: Path) -> dict:
                 f"{name}: no se conserva la demanda.",
             )
         case = domain.new_case("Prueba " + name, inputs=result["inputs"])
-        case["analytical"], case["simulation"] = result["analytical"], result
+        case["analytical"] = getattr(domain, "evaluate_" + name)(result["inputs"])
+        case["simulation"] = result
         setattr(state, name, dict(cases=[case], selected_id=case["id"]))
         summaries[name] = summary
         checks.append(name + "_simulation")
