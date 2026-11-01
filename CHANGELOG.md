@@ -9,6 +9,7 @@
 - Tipografía Latin Modern Roman distribuida con licencias GUST/LPPL, igual a MacroNet, manteniendo controles y temas neutros adaptables.
 - Acerca de y Contacto siguen la presentación de MacroNet Transport: versión, descripción, autor, GPL-3.0-only y correo para sugerencias o problemas.
 - Contacto abre la aplicación de correo o copia la dirección; no envía mensajes automáticamente.
+- Al abrir senderos guardados, se tolera el redondeo numérico entre versiones de Python/plataformas y se siguen rechazando categorías o resultados alterados.
 - Se mantienen el esquema .wksim y las metodologías existentes.
 
 

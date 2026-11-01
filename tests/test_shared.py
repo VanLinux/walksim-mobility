@@ -213,3 +213,31 @@ def test_real_mixed_engine_conserves_each_group_and_saved_events(tmp_path, mode,
     state = ProjectState(shared=dict(cases=[c], selected_id=c["id"]))
     p = save_project(state, tmp_path / "shared.wksim")
     assert load_project(p).shared == state.shared
+
+
+def test_saved_analytical_cache_is_portable_but_rejects_changed_results(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    source = Path(__file__).resolve().parents[1] / "examples/Sendero_Compartido_Comparacion.wksim"
+    data = json.loads(source.read_text())
+    case = data["shared"]["cases"][0]
+    # Python 3.12 changed floating-point summation: legitimate caches may differ by ULPs.
+    for a in (case["analytical"], case["simulation"]["analytical"]):
+        bike = a["directions"][0]["bicycle"]
+        bike["active_min"] = math.nextafter(bike["active_min"], math.inf)
+    path = tmp_path / "portable.wksim"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    assert load_project(path).shared["cases"][0]["simulation"]
+    from walksim.domain import shared as shared_model
+
+    def legacy_sum(values, start=0):
+        for value in values:
+            start += value
+        return start
+
+    monkeypatch.setattr(shared_model, "sum", legacy_sum, raising=False)
+    assert load_project(path).shared["cases"][0]["simulation"]
+    case["analytical"]["directions"][0]["bicycle"]["active_min"] += 0.01
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="inconsistente"):
+        load_project(path)

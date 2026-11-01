@@ -425,6 +425,29 @@ def fresh(case, kind):
         return False
 
 
+def _cached_matches(saved, expected):
+    """Tolera redondeo entre Python/plataformas, sin relajar estructura ni categorías."""
+    if type(expected) in (int, float):
+        return (
+            type(saved) in (int, float)
+            and math.isfinite(saved)
+            and math.isclose(saved, expected, rel_tol=1e-12, abs_tol=1e-12)
+        )
+    if isinstance(expected, dict):
+        return (
+            isinstance(saved, dict)
+            and saved.keys() == expected.keys()
+            and all(_cached_matches(saved[k], v) for k, v in expected.items())
+        )
+    if isinstance(expected, list):
+        return (
+            isinstance(saved, list)
+            and len(saved) == len(expected)
+            and all(_cached_matches(a, b) for a, b in zip(saved, expected, strict=True))
+        )
+    return type(saved) is type(expected) and saved == expected
+
+
 def validate_study(study):
     if study == {}:
         return {}
@@ -461,7 +484,9 @@ def validate_study(study):
         a = c.get("analytical")
         if a is not None:
             expected = evaluate_shared(a["inputs"])
-            if any(a[k] != expected[k] for k in ("signature", "flows", "directions")):
+            if any(
+                not _cached_matches(a[k], expected[k]) for k in ("signature", "flows", "directions")
+            ):
                 raise ValueError("Análisis de sendero inconsistente.")
         if c.get("simulation") is not None:
             validate_simulation(c["simulation"])
@@ -476,7 +501,8 @@ def validate_simulation(s):
         raise ValueError("Resumen de sendero inconsistente.")
     expected = evaluate_shared(s["inputs"])
     if not isinstance(s.get("analytical"), dict) or any(
-        s["analytical"].get(k) != expected[k] for k in ("signature", "flows", "directions")
+        not _cached_matches(s["analytical"].get(k), expected[k])
+        for k in ("signature", "flows", "directions")
     ):
         raise ValueError("Referencia analítica de simulación inconsistente.")
     m = s["summary"]
